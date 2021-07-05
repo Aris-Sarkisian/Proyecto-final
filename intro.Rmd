@@ -1,0 +1,52 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+ESCRIBIR INTRO
+
+
+```{r}
+
+library(tidyverse)
+
+datos <- read_delim('datos.csv' , delim= ';')
+
+dim(datos)
+
+```
+
+Los datos cuentan con 16 variables y 76.792 observaciones. Tres de las varibles son de tipo double, mientras que las restantes son de tipo caracter.   
+
+```{r}
+
+datos <- datos %>%
+  
+            rename(fecha_incautacion = TIEM_DIA_SK_INCAUTACION ,
+                   aduana = ADUA_ADUA_DESCC , 
+                   infraccion = INFR_INFR_DESCC ,
+                   pais_procedencia = PAIS_PAIS_DESCC_PAIS_PROCEDENC ,
+                   unidad = UCOM_UCOM_DESCC ,
+                   estado_incautacion = ESTINC_ESTINC_DESCC ,
+                   tipo = TINC_TINC_DESCC ,
+                   cantidad = INC_CANTIDAD ,
+                   valor = INC_VALOR_MN) %>%
+  
+            select(fecha_incautacion,
+                   aduana,
+                   infraccion,
+                   pais_procedencia,
+                   unidad,
+                   estado_incautacion,
+                   tipo,
+                   cantidad,
+                   valor) %>%
+
+            separate(fecha_incautacion , into=c('anio','mes'), sep=4) 
+            
+glimpse(datos)
+
+```
+
+
