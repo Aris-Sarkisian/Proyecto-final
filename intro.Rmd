@@ -4,10 +4,11 @@ output:
   html_document: default
 ---
 
-ESCRIBIR INTRO
+Este proyecto nace como un instrumento para poder aplicar los contenidos aprendidos durante el semestre en un problema real. Se tendrá que demostrar los conocimentos adquiridos al realizar un analisis exploratorio sobre datos de interes nacional, poniendo especial enfasis en la correcta visualización de los resultados obtenidos, realizando una correcta interpretación de la misma. 
+En el caso de este grupo en cuestión, se analizarán datos de incautaciones de Aduana presentados por la Dirección Nacional de Aduanas, que fueron elegidos  Para llevar a cabo estos objetivos, se utilizará exclusivamente el lenguaje de programación R,y sus respectivas expansiones, como Markdown, Shiny y RStudio.
 
 
-```{r}
+```{r,echo=FALSE}
 
 library(tidyverse)
 
@@ -17,9 +18,9 @@ dim(datos)
 
 ```
 
-Los datos cuentan con 16 variables y 76.792 observaciones. Tres de las varibles son de tipo double, mientras que las restantes son de tipo caracter.   
+Los datos  fueron obtenidos en el catalogo de datos abiertos que puso a disposición el gobierno uruguayo. Más específicamente estos fueron subidos por la Dirección Nacional de Aduanas. Cuentan con 16 variables y 76.792 observaciones. Tres de las varibles son de tipo double, mientras que las restantes son de tipo caracter.   
 
-```{r}
+```{r,echo=FALSE}
 
 datos <- datos %>%
   
@@ -41,9 +42,7 @@ datos <- datos %>%
                    estado_incautacion,
                    tipo,
                    cantidad,
-                   valor) %>%
-
-            separate(fecha_incautacion , into=c('anio','mes'), sep=4) 
+                   valor)
             
 glimpse(datos)
 
