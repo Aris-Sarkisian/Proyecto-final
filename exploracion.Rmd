@@ -1,0 +1,38 @@
+```{r}
+library(tidyverse) 
+library(lubridate)
+datos<-read_delim("datos.csv",delim=";")
+```
+
+
+Parte 1
+```{r}
+datos %>% mutate(fecha=ym(TIEM_DIA_SK_INCAUTACION)) %>% 
+group_by(TINC_TINC_DESCC,fecha,PAIS_PAIS_DESCC_PAIS_PROCEDENC) %>% summarise(conteo=n()) %>% subset(subset=grepl("ARMAS Y SUS ACCESORIOS",TINC_TINC_DESCC)) %>% ggplot()+geom_boxplot(aes(x=PAIS_PAIS_DESCC_PAIS_PROCEDENC,y=conteo))
+#solo primer articulo segun pais
+```
+```{r}
+datos%>% mutate(fecha=ym(TIEM_DIA_SK_INCAUTACION)) %>% group_by(TINC_TINC_DESCC,fecha) %>% summarise(conteo=n())  %>% subset(subset=grepl("ARMAS Y SUS ACCESORIOS",TINC_TINC_DESCC)) %>% ggplot(aes(x=fecha,y=conteo))+geom_line()
+#2 primeros articulos evolucion total
+```
+```{r}
+datos%>% mutate(fecha=ym(TIEM_DIA_SK_INCAUTACION)) %>%group_by(TINC_TINC_DESCC,fecha) %>% summarise(conteo=n()) %>%filter(TINC_TINC_DESCC %in% c("ANTEOJOS","BIJOU")) %>% ggplot(aes(x=fecha,y=conteo))+geom_line()+facet_wrap(~TINC_TINC_DESCC)
+#intento de elegir articulo
+```
+
+Parte 3
+```{r}
+datos %>% filter(INC_VALOR_MN>500) %>% filter(INC_VALOR_MN<5000)%>%group_by(ADUA_ADUA_DESCC) %>% summarise(conteo=n()) %>% ggplot(aes(x=ADUA_ADUA_DESCC,y=conteo))+geom_col()
+```
+
+Parte 2
+```{r}
+datos %>% separate(TIEM_DIA_SK_INCAUTACION, into=c("anio","mes"),sep=4) %>%group_by(INFR_INFR_DESCC,anio) %>% summarise(conteo=n()) %>% subset(subset=grepl("Contrabando",INFR_INFR_DESCC)) %>% ggplot(aes(x=anio,y=conteo))+geom_col()
+```
+
+```{r}
+hola<-datos %>% group_by(TINC_TINC_DESCC) %>% summarise(conteo=n())
+tipos<-as.vector(hola[,1])
+tipos
+```
+
