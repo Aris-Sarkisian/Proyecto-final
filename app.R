@@ -2,40 +2,126 @@ library(shiny)
 library(tidyverse) 
 library(lubridate)
 
-datos<-read_delim("datos.csv",delim=";")
+datos <- read_delim("datos.csv", delim= ";")
+
+datos <- datos %>%
+    
+    rename(fecha_incautacion = TIEM_DIA_SK_INCAUTACION ,
+           aduana = ADUA_ADUA_DESCC , 
+           infraccion = INFR_INFR_DESCC ,
+           pais_procedencia = PAIS_PAIS_DESCC_PAIS_PROCEDENC ,
+           unidad = UCOM_UCOM_DESCC ,
+           estado_incautacion = ESTINC_ESTINC_DESCC ,
+           tipo = TINC_TINC_DESCC ,
+           cantidad = INC_CANTIDAD ,
+           valor = INC_VALOR_MN) %>%
+    
+    select(fecha_incautacion,
+           aduana,
+           infraccion,
+           pais_procedencia,
+           unidad,
+           estado_incautacion,
+           tipo,
+           cantidad,
+           valor)
+    
 
 ui <- fluidPage(
+    
     navlistPanel(id = "tabset",
-        "Exploración",
+                 
+                 "Exploración",
+                 
+        tabPanel('Introduccion' , 'Escribir sobre el trabajo'),
+        
         tabPanel("Tipo de incautacion",
-                 selectInput("artefacto","Tipo de incautación",c("ARMAS Y SUS ACCESORIOS")),
+                 selectInput("artefacto","Tipo de incautación",c('ANTEOJOS', 'APARATOS PARA TELEFONIA Y ACCESORIOS ' ,
+                                                                 'ARMAS Y SUS ACCESORIOS' , 'ARTICULOS DE PIROTECNIA' , 
+                                                                 'ARTICULOS DE ELECTRICIDAD' , 'ARTICULOS DE MOBILIARIO' ,
+                                                                 'ARTICULOS DE OFICINA Y MANUFACTURAS DE PAPEL Y CARTON' ,
+                                                                 'ARTICULOS DE OPTICA' , 'ARTICULOS PARA EL HOGAR' , 
+                                                                 'BALANZAS ELECTRONICAS' , 'BEBIDAS' , 'BIJOU' ,
+                                                                 'BILLETERAS Y MONEDEROS' , 'CALZADOS' , 'CAMPING' , 'CARBON' ,
+                                                                 'CD' , 'CIGARROS' , 'COMBUSTIBLES' , 'COMESTIBLES' , 
+                                                                 'COMUNICACIONES' , 'CONSTRUCCION' , 
+                                                                 'COSMETICOS Y PRODUCTOS DE LIMIPIEZA' , 
+                                                                 'COTILLON, ACCESORIOS PARA FIESTAS Y CUMPLEANIOS',
+                                                                 'CUERO Y SUS DERIVADOS' , 'DINERO' , 'DROGAS' ,
+                                                                 'ELECTRODOMESTICOS Y APARATOS OPTICOS' ,
+                                                                 'ENVASES DE PLASTICO, LATA, VIDRIO, DIVERSOS MATERIALES' ,
+                                                                 'ESPEJOS' , 'HERRAMIENTAS' , 'INFORMATICO' ,
+                                                                 'INSECTICIDAS' , 'INSTRUMENTOS MUSICALES' , 
+                                                                 'JUGUETES EROTICOS' , 'JUGUETES VARIOS' , 'LINTERNAS' ,
+                                                                 'LUBRICANTES' , 'MAQUINARIA' , 'MATERIAL ODONTOLOGICO' , 
+                                                                 'MEDICAMENTOS' , 'PARLANTES' , 'PEGAMENTOS, SELLADORES, SILICONAS' ,
+                                                                 'PRECURSORES' , 'PRODUCTOS AGRICOLAS' , 'PRODUCTOS MINERALES' ,
+                                                                 'PRODUCTOS Y ACCESORIOS PARA LABORATORIO' , 
+                                                                 'PROTEINAS Y SUPLEMENTOS DEPORTIVOS' , 'QUEMADORES A GAS' , 
+                                                                 'RELOJES' , 'REPUESTOS' , 'TABACO' , 'VALORES' , 'VEHICULOS' ,
+                                                                 'VESTIMENTA' , 'VIDEOJUEGOS, APARATOS Y ACCESORIOS'),
+#sacar las que no tengan datos suficientes
+#sacar las ñ de las palabras, buscar si transformando funciona con gsub?
+
                  plotOutput("linea"),
                  plotOutput("caja")),
+        
         tabPanel("Tipo de infracción",
                  selectInput("crimen","Tipo de incautación",c("Abandono","Contrabando","Falsificacion","Receptacion")),
                  plotOutput("hist2")),
+        
         tabPanel("Valor de incautación",
                  numericInput("min","Valor mínimo",value=500),
-                 numericInput("max","Valor mínimo",value=5000),
+                 numericInput("max","Valor máximo",value=5000),
                  plotOutput("hist")),
-        "Datos relacionados",
+        
+                "Datos relacionados",
+        
         tabPanel("Recaudación DNA","Muestra el Panel 2"),
+        
         tabPanel("Cargas en arribo DNA","Muestra Panel 3")
     )
-)
+))
+
 server <- function(input, output){
-    output$hist<-renderPlot({
-        datos %>% filter(INC_VALOR_MN>input$min) %>% filter(INC_VALOR_MN<input$max)%>%group_by(ADUA_ADUA_DESCC) %>% summarise(conteo=n()) %>% ggplot(aes(x=ADUA_ADUA_DESCC,y=conteo))+geom_col()
+    
+    output$hist <- renderPlot({
+        
+        datos %>% 
+            filter(valor>input$min) %>% 
+            filter(valor<input$max) %>%
+            group_by(aduana) %>% 
+            summarise(conteo=n()) %>% 
+            ggplot(aes(x=aduana,y=conteo))+geom_col()
     })
-    output$hist2<-renderPlot({
-        datos %>% separate(TIEM_DIA_SK_INCAUTACION, into=c("anio","mes"),sep=4) %>%group_by(INFR_INFR_DESCC,anio) %>% summarise(conteo=n()) %>% subset(subset=grepl(input$crimen,INFR_INFR_DESCC)) %>% ggplot(aes(x=anio,y=conteo))+geom_col()
+    
+    output$hist2 <- renderPlot({
+        
+        datos %>% 
+            separate(fecha_incautacion , into=c('anio','mes'), sep=4) %>%
+            group_by(infraccion,anio) %>% 
+            summarise(conteo=n()) %>% 
+            subset(subset=grepl(input$crimen,infraccion)) %>% 
+            ggplot(aes(x=anio,y=conteo))+geom_col()
     })
+    
     output$linea<-renderPlot({
-        datos%>% mutate(fecha=ym(TIEM_DIA_SK_INCAUTACION)) %>% group_by(TINC_TINC_DESCC,fecha) %>% summarise(conteo=n())  %>% subset(subset=grepl(input$artefacto,TINC_TINC_DESCC)) %>% ggplot(aes(x=fecha,y=conteo))+geom_line()
+        
+        datos %>% 
+            group_by(tipo,fecha_incautacion) %>% 
+            summarise(conteo=n()) %>% 
+            subset(subset=grepl(input$artefacto,tipo)) %>% 
+            ggplot(aes(x=fecha_incautacion ,y=conteo))+geom_line()
     })
+    
     output$caja<-renderPlot({
-        datos %>% mutate(fecha=ym(TIEM_DIA_SK_INCAUTACION)) %>% 
-            group_by(TINC_TINC_DESCC,fecha,PAIS_PAIS_DESCC_PAIS_PROCEDENC) %>% summarise(conteo=n()) %>% subset(subset=grepl(input$artefacto,TINC_TINC_DESCC)) %>% ggplot()+geom_boxplot(aes(x=PAIS_PAIS_DESCC_PAIS_PROCEDENC,y=conteo))
+        
+        datos %>% 
+            group_by(tipo,fecha_incautacion,pais_procedencia) %>% 
+            summarise(conteo=n()) %>% 
+            subset(subset=grepl(input$artefacto,tipo)) %>% 
+            ggplot()+geom_boxplot(aes(x=pais_procedencia,y=conteo))
     })
 }
+
 shinyApp(ui = ui, server = server)
