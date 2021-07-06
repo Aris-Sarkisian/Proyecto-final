@@ -59,7 +59,7 @@ ui <- fluidPage(
                                                                  'PRODUCTOS Y ACCESORIOS PARA LABORATORIO' , 
                                                                  'PROTEINAS Y SUPLEMENTOS DEPORTIVOS' , 'QUEMADORES A GAS' , 
                                                                  'RELOJES' , 'REPUESTOS' , 'TABACO' , 'VALORES' , 'VEHICULOS' ,
-                                                                 'VESTIMENTA' , 'VIDEOJUEGOS, APARATOS Y ACCESORIOS'),
+                                                                 'VESTIMENTA' , 'VIDEOJUEGOS, APARATOS Y ACCESORIOS')),
 #sacar las que no tengan datos suficientes
 #sacar las ñ de las palabras, buscar si transformando funciona con gsub?
 
@@ -81,7 +81,7 @@ ui <- fluidPage(
         
         tabPanel("Cargas en arribo DNA","Muestra Panel 3")
     )
-))
+)
 
 server <- function(input, output){
     
@@ -108,6 +108,7 @@ server <- function(input, output){
     output$linea<-renderPlot({
         
         datos %>% 
+            mutate(fecha_incautacion=ym(fecha_incautacion)) %>%
             group_by(tipo,fecha_incautacion) %>% 
             summarise(conteo=n()) %>% 
             subset(subset=grepl(input$artefacto,tipo)) %>% 
