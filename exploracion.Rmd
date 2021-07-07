@@ -36,3 +36,7 @@ tipos<-as.vector(hola[,1])
 tipos
 ```
 
+```{r}
+datos2<-read_delim("https://catalogodatos.gub.uy/dataset/041c38c8-41b5-4bdd-87d2-3e6752115298/resource/3bf8386c-2b3a-486c-a403-6288cb422ca5/download/v_da_ft_incautaciones_csv.zip",delim=";")
+```
+
