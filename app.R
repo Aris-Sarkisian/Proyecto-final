@@ -78,6 +78,7 @@ ui <- fluidPage(
         tabPanel("Valor de incautación",
                  numericInput("min","Valor mínimo",value=500),
                  numericInput("max","Valor máximo",value=5000),
+                 "Los valores oscilan entre 0 y 148000000",
                  plotOutput("hist")),
         
                 "Datos relacionados",
@@ -97,7 +98,7 @@ server <- function(input, output){
             filter(valor<input$max) %>%
             group_by(aduana) %>% 
             summarise(conteo=n()) %>% 
-            ggplot(aes(x=aduana,y=conteo))+geom_col()
+            ggplot(aes(x=fct_reorder(aduana,conteo),y=conteo))+geom_col()+labs(x="Aduana",y="Cantidad")
     })
     
     output$hist2 <- renderPlot({
@@ -107,7 +108,7 @@ server <- function(input, output){
             group_by(infraccion,anio) %>% 
             summarise(conteo=n()) %>% 
             subset(subset=grepl(input$crimen,infraccion)) %>% 
-            ggplot(aes(x=anio,y=conteo))+geom_col()
+            ggplot(aes(x=anio,y=conteo))+geom_col()+labs(x="Tipo de infracción",y="Cantidad")
     })
     
     output$linea<-renderPlot({
@@ -117,7 +118,7 @@ server <- function(input, output){
             group_by(tipo,fecha_incautacion) %>% 
             summarise(conteo=n()) %>% 
             subset(subset=grepl(input$artefacto,tipo)) %>% 
-            ggplot(aes(x=fecha_incautacion ,y=conteo))+geom_line()
+            ggplot(aes(x=fecha_incautacion ,y=conteo))+geom_line()+labs(x="Fecha de incautación",y="Cantidad")
     })
     
     output$caja<-renderPlot({
@@ -126,7 +127,7 @@ server <- function(input, output){
             group_by(tipo,fecha_incautacion,pais_procedencia) %>% 
             summarise(conteo=n()) %>% 
             subset(subset=grepl(input$artefacto,tipo)) %>% 
-            ggplot()+geom_boxplot(aes(x=pais_procedencia,y=conteo))
+            ggplot()+geom_boxplot(aes(x=reorder(pais_procedencia,conteo,median),y=conteo))+labs(x="País de procedencia",y="Cantidad")
     })
 }
 
