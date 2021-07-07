@@ -2,7 +2,7 @@ library(shiny)
 library(tidyverse) 
 library(lubridate)
 
-datos <- read_delim("datos.csv", delim= ";")
+datos <- read_csv2("datos.csv")
 
 datos <- datos %>%
     
@@ -24,8 +24,7 @@ datos <- datos %>%
            estado_incautacion,
            tipo,
            cantidad,
-           valor)
-    
+           valor) 
 
 ui <- fluidPage(
     
@@ -33,7 +32,13 @@ ui <- fluidPage(
                  
                  "Exploración",
                  
-        tabPanel('Introduccion' , 'Escribir sobre el trabajo'),
+        tabPanel('Introduccion' , 'Este proyecto nace como un instrumento para poder aplicar los contenidos 
+                 aprendidos durante el semestre en un problema real. Se tendrá que demostrar los conocimentos adquiridos 
+                 al realizar un analisis exploratorio sobre datos de interes nacional, poniendo especial énfasis en la 
+                 correcta visualización de los resultados obtenidos, realizando una correcta interpretación de la misma. 
+                 En el caso de este grupo en cuestión, se analizarán datos de incautaciones de aduana presentados por 
+                 la Dirección Nacional de Aduanas, que fueron elegidos  Para llevar a cabo estos objetivos, se utilizará 
+                 exclusivamente el lenguaje de programación R, y sus respectivas expansiones, como Markdown, Shiny y RStudio.'),
         
         tabPanel("Tipo de incautacion",
                  selectInput("artefacto","Tipo de incautación",c('ANTEOJOS', 'APARATOS PARA TELEFONIA Y ACCESORIOS ' ,
