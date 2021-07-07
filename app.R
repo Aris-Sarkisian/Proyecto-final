@@ -16,6 +16,7 @@ datos <- datos %>%
            cantidad = INC_CANTIDAD ,
            valor = INC_VALOR_MN) %>%
     
+    
     select(fecha_incautacion,
            aduana,
            infraccion,
@@ -24,7 +25,10 @@ datos <- datos %>%
            estado_incautacion,
            tipo,
            cantidad,
-           valor) 
+           valor)
+    
+    
+    
 
 ui <- fluidPage(
     
@@ -37,7 +41,8 @@ ui <- fluidPage(
                  al realizar un analisis exploratorio sobre datos de interes nacional, poniendo especial énfasis en la 
                  correcta visualización de los resultados obtenidos, realizando una correcta interpretación de la misma. 
                  En el caso de este grupo en cuestión, se analizarán datos de incautaciones de aduana presentados por 
-                 la Dirección Nacional de Aduanas, que fueron elegidos  Para llevar a cabo estos objetivos, se utilizará 
+                 la Dirección Nacional de Aduanas, relacionando tipos y el valor las de inacutaciones, cantidades, procedencia, 
+                 estos fueron elegidos  para llevar a cabo estos objetivos, se utilizará 
                  exclusivamente el lenguaje de programación R, y sus respectivas expansiones, como Markdown, Shiny y RStudio.'),
         
         tabPanel("Tipo de incautacion",
@@ -98,7 +103,8 @@ server <- function(input, output){
             filter(valor<input$max) %>%
             group_by(aduana) %>% 
             summarise(conteo=n()) %>% 
-            ggplot(aes(x=fct_reorder(aduana,conteo),y=conteo))+geom_col()+labs(x="Aduana",y="Cantidad")
+            ggplot(aes(x=fct_reorder(aduana,conteo),y=conteo))+geom_col()+labs(x="Aduana",y="Cantidad")+
+            theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))
     })
     
     output$hist2 <- renderPlot({
@@ -108,7 +114,7 @@ server <- function(input, output){
             group_by(infraccion,anio) %>% 
             summarise(conteo=n()) %>% 
             subset(subset=grepl(input$crimen,infraccion)) %>% 
-            ggplot(aes(x=anio,y=conteo))+geom_col()+labs(x="Tipo de infracción",y="Cantidad")
+            ggplot(aes(x=anio,y=conteo))+geom_col(fill="blue")+labs(x="Año",y="Cantidad")
     })
     
     output$linea<-renderPlot({
@@ -118,8 +124,9 @@ server <- function(input, output){
             group_by(tipo,fecha_incautacion) %>% 
             summarise(conteo=n()) %>% 
             subset(subset=grepl(input$artefacto,tipo)) %>% 
-            ggplot(aes(x=fecha_incautacion ,y=conteo))+geom_line()+labs(x="Fecha de incautación",y="Cantidad")
-    })
+            ggplot(aes(x=fecha_incautacion ,y=conteo))+geom_line(color="purple")+labs(x="Fecha de incautación",y="Cantidad")
+            
+            })
     
     output$caja<-renderPlot({
         
