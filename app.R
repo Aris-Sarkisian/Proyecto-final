@@ -1,6 +1,7 @@
 library(shiny)
 library(tidyverse) 
 library(lubridate)
+library(ggpmisc)
 
 datos <- read_csv2("datos.csv")
 
@@ -124,7 +125,7 @@ server <- function(input, output){
             group_by(tipo,fecha_incautacion) %>% 
             summarise(conteo=n()) %>% 
             subset(subset=grepl(input$artefacto,tipo)) %>% 
-            ggplot(aes(x=fecha_incautacion ,y=conteo))+geom_line(color="purple")+labs(x="Fecha de incautación",y="Cantidad")
+            ggplot(aes(x=fecha_incautacion ,y=conteo))+geom_line(color="purple")+labs(x="Fecha de incautación",y="Cantidad")+stat_peaks(color="purple")+stat_peaks(geom="text",color="purple",vjust=-0.3)
             
             })
     
