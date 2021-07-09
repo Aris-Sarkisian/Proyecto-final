@@ -2,8 +2,11 @@ library(shiny)
 library(tidyverse) 
 library(lubridate)
 library(ggpmisc)
+library(data.table)
 
 datos <- read_csv2("datos.csv")
+datos <- as.data.table(datos)
+datos <- datos[, lapply(.SD, iconv, "latin1", "UTF-8")]
 
 datos <- datos %>%
     
