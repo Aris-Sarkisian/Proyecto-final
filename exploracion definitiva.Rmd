@@ -11,7 +11,7 @@ atipicovalor<-quantile(as.numeric(datos$INC_VALOR_MN),probs=0.75)+1.5*(quantile(
 
 atipicocantidad<-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)+1.5*(quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.25))
 
-datos %>% mutate(INC_CANTIDAD=round(as.numeric(INC_CANTIDAD),0),INC_VALOR_MN=round(as.numeric(INC_VALOR_MN),0))%>% filter(INC_VALOR_MN<atipicovalor)%>% filter(INC_CANTIDAD<atipicocantidad)%>% ggplot(aes(x=INC_VALOR_MN,y=INC_CANTIDAD))+geom_point(alpha=1/5)+theme(aspect.ratio = 1)+geom_smooth(method=lm)
+datos %>% mutate(INC_CANTIDAD=round(as.numeric(INC_CANTIDAD),0),INC_VALOR_MN=round(as.numeric(INC_VALOR_MN),0))%>% filter(INC_VALOR_MN<atipicovalor)%>% filter(INC_CANTIDAD<atipicocantidad)%>% ggplot(aes(x=INC_VALOR_MN,y=INC_CANTIDAD))+geom_point(alpha=1/5)+theme(aspect.ratio = 1)
 
 #cor(as.numeric(datos$INC_CANTIDAD),as.numeric(datos$INC_VALOR_MN))
 ```
@@ -24,4 +24,16 @@ datos%>%group_by(ADUA_ADUA_DESCC) %>% summarise(conteo=n()) %>% ggplot(aes(x=fct
 #distribucion valor
 ```{r}
 datos %>% filter(as.numeric(INC_VALOR_MN)<atipicovalor) %>%ggplot(aes(x=as.numeric(INC_VALOR_MN)))+geom_histogram()
+```
+
+#evolución total
+```{r}
+datos %>% mutate(fecha=ym(TIEM_DIA_SK_INCAUTACION)) %>% group_by(fecha) %>% summarise(conteo=n()) %>% ggplot(aes(x=fecha,y=conteo))+geom_line()+stat_peaks()+stat_peaks(geom="text",color="black",vjust=-0.3)
+```
+
+#relacion infraccion y estado
+```{r}
+datos %>% group_by(INFR_INFR_DESCC,ESTINC_ESTINC_DESCC) %>% summarise(conteo=n())
+tabla<-data.frame(estado=c("Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador"),infraccion=c("Abandono","Abandono","Abandono","Abandono","Abandono","Contrabando","Contrabando","Contrabando","Contrabando","Contrabando","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Receptacion","Receptacion","Receptacion","Receptacion","Receptacion"),Freq=c(17362,399,365,438,2,54169,2090,1004,416,314,101,0,3,0,0,129,0,0,0,0))
+ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradient(low="white",high="blue")
 ```
