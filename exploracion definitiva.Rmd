@@ -35,5 +35,5 @@ datos %>% mutate(fecha=ym(TIEM_DIA_SK_INCAUTACION)) %>% group_by(fecha) %>% summ
 ```{r}
 datos %>% group_by(INFR_INFR_DESCC,ESTINC_ESTINC_DESCC) %>% summarise(conteo=n())
 tabla<-data.frame(estado=c("Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador"),infraccion=c("Abandono","Abandono","Abandono","Abandono","Abandono","Contrabando","Contrabando","Contrabando","Contrabando","Contrabando","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Receptacion","Receptacion","Receptacion","Receptacion","Receptacion"),Freq=c(17362,399,365,438,2,54169,2090,1004,416,314,101,0,3,0,0,129,0,0,0,0))
-ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradient(low="white",high="blue")
+ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradient(low="white",high="blue")+geom_text(aes(label=Freq))
 ```
