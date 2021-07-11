@@ -3,6 +3,11 @@ library(tidyverse)
 library(lubridate)
 datos<-read_delim("datos.csv",delim=";")
 ```
+```{r}
+library(data.table)
+datos <- as.data.table(datos)
+datos <- datos[, lapply(.SD, iconv, "latin1", "UTF-8")]
+```
 
 
 Parte 1
@@ -22,12 +27,12 @@ datos%>% mutate(fecha=ym(TIEM_DIA_SK_INCAUTACION)) %>%group_by(TINC_TINC_DESCC,f
 
 Parte 3
 ```{r}
-datos %>% filter(INC_VALOR_MN>500) %>% filter(INC_VALOR_MN<50000)%>%group_by(ADUA_ADUA_DESCC) %>% summarise(conteo=n()) %>% ggplot(aes(x=fct_reorder(ADUA_ADUA_DESCC,conteo),y=conteo))+geom_col()
+datos%>%group_by(ADUA_ADUA_DESCC) %>% summarise(conteo=n()) %>% ggplot(aes(x=fct_reorder(ADUA_ADUA_DESCC,conteo),y=conteo))+geom_col()
 ```
 
 Parte 2
 ```{r}
-datos %>% separate(TIEM_DIA_SK_INCAUTACION, into=c("anio","mes"),sep=4) %>%group_by(INFR_INFR_DESCC,anio) %>% summarise(conteo=n()) %>% subset(subset=grepl("Contrabando",INFR_INFR_DESCC)) %>% ggplot(aes(x=anio,y=conteo))+geom_col()
+datos %>% separate(TIEM_DIA_SK_INCAUTACION, into=c("anio","mes"),sep=4) %>%group_by(INFR_INFR_DESCC,anio) %>% summarise(conteo=n()) %>% ggplot(aes(x=anio,y=conteo))+geom_col()+facet_wrap(~INFR_INFR_DESCC,scales="free")
 ```
 
 ```{r}
@@ -37,15 +42,25 @@ tipos
 ```
 
 ```{r}
-datos2<-read_delim("https://catalogodatos.gub.uy/dataset/041c38c8-41b5-4bdd-87d2-3e6752115298/resource/3bf8386c-2b3a-486c-a403-6288cb422ca5/download/v_da_ft_incautaciones_csv.zip",delim=";")
-```
-
-```{r}
-datos %>% filter(INC_VALOR_MN>100000000) %>% group_by(ADUA_ADUA_DESCC) %>% summarise(conteo=n())
-```
-
-```{r}
 datos %>% mutate(fecha=ym(TIEM_DIA_SK_INCAUTACION)) %>% 
 group_by(TINC_TINC_DESCC,fecha,PAIS_PAIS_DESCC_PAIS_PROCEDENC) %>% summarise(conteo=n()) %>% subset(subset=grepl("ARMAS Y SUS ACCESORIOS",TINC_TINC_DESCC)) %>% ggplot()+geom_boxplot(aes(x=reorder(PAIS_PAIS_DESCC_PAIS_PROCEDENC,conteo,median),y=conteo))
+```
+
+```{r}
+datos %>% filter(as.numeric(INC_VALOR_MN)<atipicovalor) %>%ggplot(aes(x=as.numeric(INC_VALOR_MN)))+geom_histogram()
+```
+
+```{r}
+datos %>% group_by(ADUA_ADUA_DESCC,PAIS_PAIS_DESCC_PAIS_PROCEDENC) %>% summarise(conteo=n()) %>%ggplot()+geom_tile(aes(x=PAIS_PAIS_DESCC_PAIS_PROCEDENC,y=ADUA_ADUA_DESCC,fill=conteo))
+```
+
+```{r}
+atipicovalor<-quantile(as.numeric(datos$INC_VALOR_MN),probs=0.75)+1.5*(quantile(as.numeric(datos$INC_VALOR_MN),probs=0.75)-quantile(as.numeric(datos$INC_VALOR_MN),probs=0.25))
+
+atipicocantidad<-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)+1.5*(quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.25))
+
+datos %>% mutate(INC_CANTIDAD=round(as.numeric(INC_CANTIDAD),0),INC_VALOR_MN=round(as.numeric(INC_VALOR_MN),0))%>% filter(INC_VALOR_MN<atipicovalor)%>% filter(INC_CANTIDAD<atipicocantidad)%>% ggplot(aes(x=INC_VALOR_MN,y=INC_CANTIDAD))+geom_point(alpha=1/5)+theme(aspect.ratio = 1)+geom_smooth(method=lm)
+
+#cor(as.numeric(datos$INC_CANTIDAD),as.numeric(datos$INC_VALOR_MN))
 ```
 

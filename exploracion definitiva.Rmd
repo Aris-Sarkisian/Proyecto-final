@@ -1,0 +1,27 @@
+graficos que van al documento
+
+#segun tipo de infraccion
+```{r}
+datos %>% separate(TIEM_DIA_SK_INCAUTACION, into=c("anio","mes"),sep=4) %>%group_by(INFR_INFR_DESCC,anio) %>% summarise(conteo=n()) %>% ggplot(aes(x=anio,y=conteo))+geom_col()+facet_wrap(~INFR_INFR_DESCC,scales="free")
+```
+
+#relacion cantidad y valor
+```{r}
+atipicovalor<-quantile(as.numeric(datos$INC_VALOR_MN),probs=0.75)+1.5*(quantile(as.numeric(datos$INC_VALOR_MN),probs=0.75)-quantile(as.numeric(datos$INC_VALOR_MN),probs=0.25))
+
+atipicocantidad<-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)+1.5*(quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.25))
+
+datos %>% mutate(INC_CANTIDAD=round(as.numeric(INC_CANTIDAD),0),INC_VALOR_MN=round(as.numeric(INC_VALOR_MN),0))%>% filter(INC_VALOR_MN<atipicovalor)%>% filter(INC_CANTIDAD<atipicocantidad)%>% ggplot(aes(x=INC_VALOR_MN,y=INC_CANTIDAD))+geom_point(alpha=1/5)+theme(aspect.ratio = 1)+geom_smooth(method=lm)
+
+#cor(as.numeric(datos$INC_CANTIDAD),as.numeric(datos$INC_VALOR_MN))
+```
+
+#cantidad segun aduana
+```{r}
+datos%>%group_by(ADUA_ADUA_DESCC) %>% summarise(conteo=n()) %>% ggplot(aes(x=fct_reorder(ADUA_ADUA_DESCC,conteo),y=conteo))+geom_col()
+```
+
+#distribucion valor
+```{r}
+datos %>% filter(as.numeric(INC_VALOR_MN)<atipicovalor) %>%ggplot(aes(x=as.numeric(INC_VALOR_MN)))+geom_histogram()
+```
