@@ -38,7 +38,7 @@ ui <- fluidPage(
     
     navlistPanel(id = "tabset",
                  
-                 "Exploración",
+                 "Incautaciones",
                  
         tabPanel('Introduccion' , 'Este proyecto nace como un instrumento para poder aplicar los contenidos 
                  aprendidos durante el semestre en un problema real. Se tendrá que demostrar los conocimentos adquiridos 
@@ -74,8 +74,6 @@ ui <- fluidPage(
                                                                  'PROTEINAS Y SUPLEMENTOS DEPORTIVOS' , 'QUEMADORES A GAS' , 
                                                                  'RELOJES' , 'REPUESTOS' , 'TABACO' , 'VALORES' , 'VEHICULOS' ,
                                                                  'VESTIMENTA' , 'VIDEOJUEGOS, APARATOS Y ACCESORIOS')),
-#sacar las que no tengan datos suficientes
-#sacar las ñ de las palabras, buscar si transformando funciona con gsub?
 
                  plotOutput("linea"),
                  plotOutput("caja")),
@@ -90,11 +88,9 @@ ui <- fluidPage(
                  "Los valores oscilan entre 0 y 148000000",
                  plotOutput("hist")),
         
-                "Datos relacionados",
-        
-        tabPanel("Recaudación DNA","Muestra el Panel 2"),
-        
-        tabPanel("Cargas en arribo DNA","Muestra Panel 3")
+        tabPanel("Relación cantidad y valor",
+                 selectInput("color","Variable en color",c("aduana","infraccion","estado_incautacion")),
+                 plotOutput("puntos"))
     )
 )
 
@@ -139,6 +135,14 @@ server <- function(input, output){
             summarise(conteo=n()) %>% 
             subset(subset=grepl(input$artefacto,tipo)) %>% 
             ggplot()+geom_boxplot(aes(x=reorder(pais_procedencia,conteo,median),y=conteo))+labs(x="País de procedencia",y="Cantidad")
+    })
+    
+    output$puntos<-renderPlot({
+        atipicovalor<-quantile(as.numeric(datos$valor),probs=0.75)+1.5*(quantile(as.numeric(datos$valor),probs=0.75)-quantile(as.numeric(datos$valor),probs=0.25))
+        
+        atipicocantidad<-quantile(as.numeric(datos$cantidad),probs=0.75)+1.5*(quantile(as.numeric(datos$cantidad),probs=0.75)-quantile(as.numeric(datos$cantidad),probs=0.25))
+        
+        datos %>% mutate(INC_CANTIDAD=round(as.numeric(cantidad),0),INC_VALOR_MN=round(as.numeric(valor),0))%>% filter(INC_VALOR_MN<atipicovalor)%>% filter(INC_CANTIDAD<atipicocantidad)%>% ggplot(aes(x=INC_VALOR_MN,y=INC_CANTIDAD,colour=.data[[input$color]]))+geom_point()+theme(aspect.ratio = 1)
     })
 }
 
