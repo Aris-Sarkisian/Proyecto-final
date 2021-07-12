@@ -69,6 +69,8 @@ datos <- datos[, lapply(.SD, iconv, "latin1", "UTF-8")]
 Para realizar la exploración, nos planteamos algunas preguntas para orientar el análisis. En primer lugar, decidimos investigar de qué manera había evolucionado la cantidad total de incautaciones durante el período en cuestión, teniendo en cuenta las diferentes infracciones que se pueden realizar.
 
 ```{r,echo=FALSE,fig.cap=}
+library(ggpmisc)
+library(lubridate)
 datos %>% mutate(fecha=ym(TIEM_DIA_SK_INCAUTACION)) %>% group_by(fecha) %>% summarise(conteo=n()) %>% ggplot(aes(x=fecha,y=conteo))+geom_line()+stat_peaks()+stat_peaks(geom="text",color="black",vjust=-0.3)
 ```
 ```{r,echo=FALSE,fig.cap=}
