@@ -18,7 +18,7 @@ datos %>% mutate(INC_CANTIDAD=round(as.numeric(INC_CANTIDAD),0),INC_VALOR_MN=rou
 
 #cantidad segun aduana
 ```{r}
-datos%>%group_by(ADUA_ADUA_DESCC) %>% summarise(conteo=n()) %>% ggplot(aes(x=fct_reorder(ADUA_ADUA_DESCC,conteo),y=conteo))+geom_col()
+datos%>%group_by(ADUA_ADUA_DESCC) %>% summarise(conteo=n()) %>% ggplot(aes(x=fct_reorder(ADUA_ADUA_DESCC,conteo),y=conteo))+geom_col()+theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))
 ```
 
 #distribucion valor
@@ -36,4 +36,12 @@ datos %>% mutate(fecha=ym(TIEM_DIA_SK_INCAUTACION)) %>% group_by(fecha) %>% summ
 datos %>% group_by(INFR_INFR_DESCC,ESTINC_ESTINC_DESCC) %>% summarise(conteo=n())
 tabla<-data.frame(estado=c("Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador"),infraccion=c("Abandono","Abandono","Abandono","Abandono","Abandono","Contrabando","Contrabando","Contrabando","Contrabando","Contrabando","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Receptacion","Receptacion","Receptacion","Receptacion","Receptacion"),Freq=c(17362,399,365,438,2,54169,2090,1004,416,314,101,0,3,0,0,129,0,0,0,0))
 ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradient(low="white",high="blue")+geom_text(aes(label=Freq))
+```
+
+#relacion aduana y pais
+```{r}
+tabla2 <- subset(data.frame( table(datos$ADUA_ADUA_DESCC)))
+aduanas <- subset(datos, ADUA_ADUA_DESCC %in% tabla2$Var1)
+tabla2<- data.frame( with(aduanas, table(PAIS_PAIS_DESCC_PAIS_PROCEDENC, ADUA_ADUA_DESCC) ) )
+ggplot(tabla2) + geom_tile(aes(x=PAIS_PAIS_DESCC_PAIS_PROCEDENC, y=ADUA_ADUA_DESCC, fill=Freq))+ theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+scale_fill_gradient(low="white",high="black")
 ```
