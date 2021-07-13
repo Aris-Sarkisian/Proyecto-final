@@ -71,43 +71,49 @@ Para realizar la exploración, nos planteamos algunas preguntas para orientar el
 ```{r,echo=FALSE,fig.cap=}
 library(ggpmisc)
 library(lubridate)
-datos %>% mutate(fecha=ym(TIEM_DIA_SK_INCAUTACION)) %>% group_by(fecha) %>% summarise(conteo=n()) %>% ggplot(aes(x=fecha,y=conteo))+geom_line()+stat_peaks()+stat_peaks(geom="text",color="black",vjust=-0.3)
+datos %>% mutate(fecha=ym(fecha_incautacion)) %>% group_by(fecha) %>% summarise(conteo=n()) %>% ggplot(aes(x=fecha,y=conteo))+geom_line()+stat_peaks()+stat_peaks(geom="text",color="black",vjust=-0.3)+labs(x="Fecha de la incautacion",y="Cantidad de incautaciones")
 ```
 ```{r,echo=FALSE,fig.cap=}
-datos %>% separate(TIEM_DIA_SK_INCAUTACION, into=c("anio","mes"),sep=4) %>%group_by(INFR_INFR_DESCC,anio) %>% summarise(conteo=n()) %>% ggplot(aes(x=anio,y=conteo))+geom_col()+facet_wrap(~INFR_INFR_DESCC,scales="free")
+datos %>% separate(fecha_incautacion, into=c("anio","mes"),sep=4) %>%group_by(infraccion,anio) %>% summarise(conteo=n()) %>% ggplot(aes(x=anio,y=conteo))+geom_col()+facet_wrap(~infraccion,scales="free")+labs(x="Año",y="Cantidad")
 ```
 
-Luego decidimos analizar más en profundidad la variable "Valor", que indica el valor de la incautación realizada en cada caso. Para hacer esto, iniciamos observando la distribución de la variable, para luego adentrarnos en la relación que tiene el valor con la cantidad de incautaciones incautadas.
+Luego decidimos analizar más en profundidad la variable "Valor", que indica el valor de la incautación realizada en cada caso. Para hacer esto, iniciamos observando la distribución de la variable, para luego adentrarnos en la relación que tiene el valor (medido en pesos) con la cantidad de incautaciones incautadas.
 
-```{r,echo=FALSE,fig.cap=}
-datos %>% filter(as.numeric(INC_VALOR_MN)<atipicovalor) %>%ggplot(aes(x=as.numeric(INC_VALOR_MN)))+geom_histogram()
-```
-```{r,echo=FALSE,fig.cap=}
-atipicovalor<-quantile(as.numeric(datos$INC_VALOR_MN),probs=0.75)+1.5*(quantile(as.numeric(datos$INC_VALOR_MN),probs=0.75)-quantile(as.numeric(datos$INC_VALOR_MN),probs=0.25))
-
-atipicocantidad<-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)+1.5*(quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.25))
-
-datos %>% mutate(INC_CANTIDAD=round(as.numeric(INC_CANTIDAD),0),INC_VALOR_MN=round(as.numeric(INC_VALOR_MN),0))%>% filter(INC_VALOR_MN<atipicovalor)%>% filter(INC_CANTIDAD<atipicocantidad)%>% ggplot(aes(x=INC_VALOR_MN,y=INC_CANTIDAD))+geom_point(alpha=1/5)+theme(aspect.ratio = 1)
-```
-```{r,echo=FALSE,fig.cap=}
-cor(as.numeric(datos$INC_CANTIDAD),as.numeric(datos$INC_VALOR_MN))
+```{r,echo=FALSE,fig.cap= Se puede observar una clara relacion entre el valor y la cantiad dado que la mayoria de las incautaciones son de un bajo valor}
+datos %>% filter(as.numeric(valor)<atipicovalor) %>%ggplot(aes(x=as.numeric(valor)))+geom_histogram(bins=30)+labs(x="Valor en U$",y="Cantidad de incautaciones")
 ```
 
-A continuación nos enfocamos en la variable "aduana", que hace referncia al lugar dentro del Uruguay que se realizó el acto de incautar. Como primer paso se investigó de que manera se distribuyen las incautaciones totales dentro del territorio nacional. Sucesivamente, nos interesó saber el destino de cada uno de estos actos, sabiendo también el origen.
-
 ```{r,echo=FALSE,fig.cap=}
-datos%>%group_by(ADUA_ADUA_DESCC) %>% summarise(conteo=n()) %>% ggplot(aes(x=fct_reorder(ADUA_ADUA_DESCC,conteo),y=conteo))+geom_col()+theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))
+atipicovalor<-quantile(as.numeric(datos$valor),probs=0.75)+1.5*(quantile(as.numeric(datos$valor),probs=0.75)-quantile(as.numeric(datos$valor),probs=0.25))
+
+atipicocantidad<-quantile(as.numeric(datos$cantidad),probs=0.75)+1.5*(quantile(as.numeric(datos$cantidad),probs=0.75)-quantile(as.numeric(datos$cantidad),probs=0.25))
+
+datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad))+geom_point(alpha=1/8)+theme(aspect.ratio = 1)+labs(x="Valor en U$",y="Cantidad")
 ```
 ```{r,echo=FALSE,fig.cap=}
-tabla2 <- subset(data.frame( table(datos$ADUA_ADUA_DESCC)))
-aduanas <- subset(datos, ADUA_ADUA_DESCC %in% tabla2$Var1)
-tabla2<- data.frame( with(aduanas, table(PAIS_PAIS_DESCC_PAIS_PROCEDENC, ADUA_ADUA_DESCC) ) )
-ggplot(tabla2) + geom_tile(aes(x=PAIS_PAIS_DESCC_PAIS_PROCEDENC, y=ADUA_ADUA_DESCC, fill=Freq))+ theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+scale_fill_gradient(low="white",high="black")
+cor(as.numeric(datos$cantidad),as.numeric(datos$valor))
+```
+
+A continuación nos enfocamos en la variable "aduana", que hace referencia al lugar dentro del Uruguay que se realizó el acto de incautar. Como primer paso se investigó de que manera se distribuyen las incautaciones totales dentro del territorio nacional. Sucesivamente, nos interesó saber el destino de cada uno de estos actos, sabiendo también el origen.
+
+```{r,echo=FALSE,fig.cap=}
+datos%>%
+  select(aduana)%>%
+  mutate(aduana = recode(aduana, `SEDE REGIONAL SUROESTE(BAJA)` = "SEDE SUDOESTE",
+`SEDE REGIONAL LITORAL NORESTE(BAJA)`= "SEDE NORESTE",`SEDE REGIONAL OESTE(ANTES NOROESTE)` = "SEDE OESTE")) %>%
+  group_by(aduana) %>%
+  summarise(conteo=n()) %>% ggplot(aes(x=fct_reorder(aduana,conteo),y=conteo))+geom_col()+theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+labs(y='Cantidad de incautaciones',x='Aduana')
+```
+```{r,echo=FALSE,fig.cap=}
+tabla2 <- subset(data.frame( table(datos$aduana)))
+aduanas <- subset(datos, aduana %in% tabla2$Var1)
+tabla2<- data.frame( with(aduanas, table(pais_procedencia, aduana) ) )
+ggplot(tabla2) + geom_tile(aes(x=pais_procedencia, y=aduana, fill=Freq))+ theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+scale_fill_gradient(low="white",high="black")+labs(x="Pais de procedecnia",y="Aduana")
 ```
 
 Como último objetivo, decidimos investigar el estado en el que se encuantra cada incautación, intentando observar cuál infracción demora más tiempo en resolverse.
 ```{r,echo=FALSE,fig.cap=}
-datos %>% group_by(INFR_INFR_DESCC,ESTINC_ESTINC_DESCC) %>% summarise(conteo=n())
+datos %>% group_by(infraccion,estado_incautacion) %>% summarise(conteo=n())
 tabla<-data.frame(estado=c("Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador"),infraccion=c("Abandono","Abandono","Abandono","Abandono","Abandono","Contrabando","Contrabando","Contrabando","Contrabando","Contrabando","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Receptacion","Receptacion","Receptacion","Receptacion","Receptacion"),Freq=c(17362,399,365,438,2,54169,2090,1004,416,314,101,0,3,0,0,129,0,0,0,0))
 ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradient(low="white",high="blue")+geom_text(aes(label=Freq))
 ```
