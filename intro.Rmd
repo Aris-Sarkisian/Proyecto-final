@@ -18,7 +18,7 @@ dim(datos)
 
 ```
 
-Los datos  fueron obtenidos en el catalogo de datos abiertos que puso a disposición el gobierno uruguayo. Más específicamente estos fueron subidos por la Dirección Nacional de Aduanas. Cuentan con 16 variables y 76.792 observaciones. Tres de las varibles son de tipo double, mientras que las restantes son de tipo caracter.   
+Los datos  fueron obtenidos en el catalogo de datos abiertos que puso a disposición el gobierno uruguayo. Más específicamente estos fueron subidos por la Dirección Nacional de Aduanas. Cuentan con 16 variables y 76.792 observaciones. Tres de las varibles son de tipo double, mientras que las restantes son de tipo caracter. 
 
 ```{r,echo=FALSE}
 
