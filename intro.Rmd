@@ -11,9 +11,9 @@ En el caso de este grupo en cuestión, se analizarán datos de incautaciones de 
 ```{r,echo=FALSE}
 
 library(tidyverse)
-library(readr)
-datos <- read_rds(here('data','raw','datos.rds'))
-                                                                                                                                                                                                                                                                
+
+datos <- read_csv2('datos.csv')
+
 dim(datos)
 
 ```
@@ -84,11 +84,14 @@ datos %>% filter(as.numeric(valor)<atipicovalor) %>%ggplot(aes(x=as.numeric(valo
 ```
 
 ```{r,echo=FALSE,fig.cap= se observa una correlacion casi nula entre las variables y una clara tendencia a que las incauaciones sean de bajo valor y cantidad}
-atipicovalor<-quantile(as.numeric(datos$valor),probs=0.75)+1.5*(quantile(as.numeric(datos$valor),probs=0.75)-quantile(as.numeric(datos$valor),probs=0.25))
+atipicovalor<-quantile(as.numeric(datos$INC_VALOR_MN),probs=0.75)+1.5*(quantile(as.numeric(datos$INC_VALOR_MN),probs=0.75)-quantile(as.numeric(datos$INC_VALOR_MN),probs=0.25))
 
-atipicocantidad<-quantile(as.numeric(datos$cantidad),probs=0.75)+1.5*(quantile(as.numeric(datos$cantidad),probs=0.75)-quantile(as.numeric(datos$cantidad),probs=0.25))
+atipicocantidad<-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)+1.5*(quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.25))
 
-datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad))+geom_point(alpha=1/8,size=1)+theme(aspect.ratio = 1)+labs(x="Valor en U$",y="Cantidad")
+grafico<-datos %>% mutate(INC_CANTIDAD=round(as.numeric(INC_CANTIDAD),0),INC_VALOR_MN=round(as.numeric(INC_VALOR_MN),0))%>% filter(INC_VALOR_MN<atipicovalor)%>% filter(INC_CANTIDAD<atipicocantidad)%>% ggplot(aes(x=INC_VALOR_MN,y=INC_CANTIDAD))+geom_hex()
+
+library(plotly)
+ggplotly(grafico)
 ```
 ```{r,echo=FALSE,fig.cap=}
 cor(as.numeric(datos$cantidad),as.numeric(datos$valor))
