@@ -11,9 +11,9 @@ En el caso de este grupo en cuestión, se analizarán datos de incautaciones de 
 ```{r,echo=FALSE}
 
 library(tidyverse)
-
-datos <- read_csv2('datos.csv')
-
+library(readr)
+datos <- read_rds(here('data','raw','datos.rds'))
+                                                                                                                                                                                                                                                                
 dim(datos)
 
 ```
@@ -51,13 +51,13 @@ glimpse(datos)
 ```{r,echo=FALSE}
 
 #cambiar tildes y ñ
-
-lapply(datos, gsub, pattern = "Á", replacement = "A")
-lapply(datos, gsub, pattern = "É", replacement = "E")
-lapply(datos, gsub, pattern = "Í", replacement = "I")
-lapply(datos, gsub, pattern = "Ó", replacement = "O")
-lapply(datos, gsub, pattern = "Ú", replacement = "U")
-lapply(datos, gsub, pattern = "Ñ", replacement = "N")
+# 
+# lapply(datos, gsub, pattern = "Á", replacement = "A")
+# lapply(datos, gsub, pattern = "É", replacement = "E")
+# lapply(datos, gsub, pattern = "Í", replacement = "I")
+# lapply(datos, gsub, pattern = "Ó", replacement = "O")
+# lapply(datos, gsub, pattern = "Ú", replacement = "U")
+# lapply(datos, gsub, pattern = "Ñ", replacement = "N")
 
 library(data.table)
 
@@ -68,30 +68,27 @@ datos <- datos[, lapply(.SD, iconv, "latin1", "UTF-8")]
 
 Para realizar la exploración, nos planteamos algunas preguntas para orientar el análisis. En primer lugar, decidimos investigar de qué manera había evolucionado la cantidad total de incautaciones durante el período en cuestión, teniendo en cuenta las diferentes infracciones que se pueden realizar.
 
-```{r,echo=FALSE,fig.cap= Se puede ver un aumento en la cantidad de incautaciones en el correr del año con un gran descenso en el verano diciembre-enero, puede deberse a un menor control aduanero y un enfoque en el turismo, o por un menor comercio en esta época. Se puede ver también como el covid no disminuyó las incautaciones}
+```{r,echo=FALSE,fig.cap="Se puede ver un aumento en la cantidad de incautaciones en el correr del año con un gran descenso en el verano diciembre-enero, puede deberse a un menor control aduanero y un enfoque en el turismo, o por un menor comercio en esta época. Se puede ver también como el covid no disminuyó las incautaciones"}
 library(ggpmisc)
 library(lubridate)
 datos %>% mutate(fecha=ym(fecha_incautacion)) %>% group_by(fecha) %>% summarise(conteo=n()) %>% ggplot(aes(x=fecha,y=conteo))+geom_line()+stat_peaks()+stat_peaks(geom="text",color="black",vjust=-0.3)+labs(x="Fecha de la incautación",y="Cantidad de incautaciones")
 ```
-```{r,echo=FALSE,fig.cap= Los bajos datos del año 2021 se debe a que los datos llegan solo hasta mitad de año. Existe un claro aumento desde el 2018 a 2019 en todos los tipos de incautaciones, puede ser por un mayor control en las aduanas o un cambio de politica, hay un gran pico de falsificaciones en 2019, mientras que en el 2020 los otros tipos de incautaciones frecuentaron más}
+```{r,echo=FALSE,fig.cap="Los bajos datos del año 2021 se debe a que los datos llegan solo hasta mitad de año. Existe un claro aumento desde el 2018 a 2019 en todos los tipos de incautaciones, puede ser por un mayor control en las aduanas o un cambio de politica, hay un gran pico de falsificaciones en 2019, mientras que en el 2020 los otros tipos de incautaciones frecuentaron más"}
 datos %>% separate(fecha_incautacion, into=c("anio","mes"),sep=4) %>%group_by(infraccion,anio) %>% summarise(conteo=n()) %>% ggplot(aes(x=anio,y=conteo))+geom_col()+facet_wrap(~infraccion,scales="free")+labs(x="Año",y="Cantidad")
 ```
 
 Luego decidimos analizar más en profundidad la variable "Valor", que indica el valor de la incautación realizada en cada caso. Para hacer esto, iniciamos observando la distribución de la variable, para luego adentrarnos en la relación que tiene el valor (medido en pesos) con la cantidad de incautaciones incautadas.
 
-```{r,echo=FALSE,fig.cap= Se puede observar una clara relación entre el valor y la cantidad, dado que la mayoria de las incautaciones son de un bajo valor}
+```{r,echo=FALSE,fig.cap="Se puede observar una clara relación entre el valor y la cantidad, dado que la mayoria de las incautaciones son de un bajo valor"}
 datos %>% filter(as.numeric(valor)<atipicovalor) %>%ggplot(aes(x=as.numeric(valor)))+geom_histogram(bins=30)+labs(x="Valor en U$",y="Cantidad de incautaciones")
 ```
 
-```{r,echo=FALSE,fig.cap= se observa una correlacion casi nula entre las variables y una clara tendencia a que las incauaciones sean de bajo valor y cantidad}
-atipicovalor<-quantile(as.numeric(datos$INC_VALOR_MN),probs=0.75)+1.5*(quantile(as.numeric(datos$INC_VALOR_MN),probs=0.75)-quantile(as.numeric(datos$INC_VALOR_MN),probs=0.25))
+```{r,echo=FALSE,fig.cap="Se observa una correlacion casi nula entre las variables y una clara tendencia a que las incauaciones sean de bajo valor y cantidad"}
+atipicovalor<-quantile(as.numeric(datos$valor),probs=0.75)+1.5*(quantile(as.numeric(datos$valor),probs=0.75)-quantile(as.numeric(datos$valor),probs=0.25))
 
-atipicocantidad<-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)+1.5*(quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.25))
+atipicocantidad<-quantile(as.numeric(datos$cantidad),probs=0.75)+1.5*(quantile(as.numeric(datos$cantidad),probs=0.75)-quantile(as.numeric(datos$cantidad),probs=0.25))
 
-grafico<-datos %>% mutate(INC_CANTIDAD=round(as.numeric(INC_CANTIDAD),0),INC_VALOR_MN=round(as.numeric(INC_VALOR_MN),0))%>% filter(INC_VALOR_MN<atipicovalor)%>% filter(INC_CANTIDAD<atipicocantidad)%>% ggplot(aes(x=INC_VALOR_MN,y=INC_CANTIDAD))+geom_hex()
-
-library(plotly)
-ggplotly(grafico)
+datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad))+geom_point(alpha=1/8,size=1)+theme(aspect.ratio = 1)+labs(x="Valor en U$",y="Cantidad")
 ```
 ```{r,echo=FALSE,fig.cap=}
 cor(as.numeric(datos$cantidad),as.numeric(datos$valor))
@@ -99,7 +96,7 @@ cor(as.numeric(datos$cantidad),as.numeric(datos$valor))
 
 A continuación nos enfocamos en la variable "aduana", que hace referencia al lugar dentro del Uruguay que se realizó el acto de incautar. Como primer paso se investigó de que manera se distribuyen las incautaciones totales dentro del territorio nacional. Sucesivamente, nos interesó saber el destino de cada uno de estos actos, sabiendo también el origen.
 
-```{r,echo=FALSE,fig.cap= Hay una clara mayor cantidad de incautaciones en las aduanas del este y norte, se debe al mercado con el pais froterizo Brasil, el cual se diferencia claramente de las aduanas del oeste}
+```{r,echo=FALSE,fig.cap="Hay una clara mayor cantidad de incautaciones en las aduanas del este y norte, se debe al mercado con el pais froterizo Brasil, el cual se diferencia claramente de las aduanas del oeste"}
 datos%>%
   select(aduana)%>%
   mutate(aduana = recode(aduana, `SEDE REGIONAL SUROESTE(BAJA)` = "SEDE SUDOESTE",
