@@ -101,6 +101,9 @@ server <- function(input, output){
         datos %>% 
             filter(valor>input$min) %>% 
             filter(valor<input$max) %>%
+            select(aduana)%>%
+            mutate(aduana = recode(aduana, `SEDE REGIONAL SUROESTE(BAJA)` = "SEDE SUDOESTE",
+                                   `SEDE REGIONAL LITORAL NORESTE(BAJA)`= "SEDE NORESTE",`SEDE REGIONAL OESTE(ANTES NOROESTE)` = "SEDE OESTE")) %>%
             group_by(aduana) %>% 
             summarise(conteo=n()) %>% 
             ggplot(aes(x=fct_reorder(aduana,conteo),y=conteo))+geom_col()+labs(x="Aduana",y="Cantidad")+
@@ -131,10 +134,12 @@ server <- function(input, output){
     output$caja<-renderPlot({
         
         datos %>% 
+            mutate(pais_procedencia = recode(pais_procedencia, `CHINA, REPUBLICA POPULAR DE` = "CHINA",
+                                   `UNITED STATES MINOR OUTLYING ISLANDS`= "USA",`RUSIA(FEDERACION RUSA)`="RUSIA")) %>%
             group_by(tipo,fecha_incautacion,pais_procedencia) %>% 
             summarise(conteo=n()) %>% 
             subset(subset=grepl(input$artefacto,tipo)) %>% 
-            ggplot()+geom_boxplot(aes(x=reorder(pais_procedencia,conteo,median),y=conteo))+labs(x="País de procedencia",y="Cantidad")
+            ggplot()+geom_boxplot(aes(x=reorder(pais_procedencia,conteo,median),y=conteo))+labs(x="País de procedencia",y="Cantidad")+theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))
     })
     
     output$puntos<-renderPlot({
