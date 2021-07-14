@@ -18,7 +18,7 @@ dim(datos)
 
 ```
 
-Los datos  fueron obtenidos en el catalogo de datos abiertos que puso a disposición el gobierno uruguayo. Más específicamente estos fueron subidos por la Dirección Nacional de Aduanas. Cuentan con 16 variables y 76.792 observaciones. Tres de las varibles son de tipo double, mientras que las restantes son de tipo caracter. 
+Los datos  fueron obtenidos en el catalogo de datos abiertos que puso a disposición el gobierno uruguayo. Más específicamente estos fueron subidos por la Dirección Nacional de Aduanas. Cuentan con 16 variables y 76.792 observaciones. Tres de las varibles son de tipo double, mientras que las restantes son de tipo caracter. Cada observación se refiere a una incautación realizada, y ofrece información soobre ella.Las variables que utilizaremos son:
 
 ```{r,echo=FALSE}
 
@@ -64,6 +64,10 @@ library(data.table)
 datos <- as.data.table(datos)
 datos <- datos[, lapply(.SD, iconv, "latin1", "UTF-8")]
 
+```
+
+```{r,echo=FALSE}
+data.frame(variable=c("fecha_incautacion","aduana","infraccion","pais_procedencia", "estado_incautacion","tipo","cantidad","valor"),descrpición=c("Fecha en que se registró","Aduana en que se realizó","Descrición del crimen realizado","País de donde provenía","Estado en el que se encuentra actualmente","Producto incautado","Cantidad incautada","Valor total en $"))
 ```
 
 Para realizar la exploración, nos planteamos algunas preguntas para orientar el análisis. En primer lugar, decidimos investigar de qué manera había evolucionado la cantidad total de incautaciones durante el período en cuestión, teniendo en cuenta las diferentes infracciones que se pueden realizar.
