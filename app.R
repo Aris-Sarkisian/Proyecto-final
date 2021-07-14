@@ -3,8 +3,8 @@ library(tidyverse)
 library(lubridate)
 library(ggpmisc)
 library(data.table)
-
-datos <- read_csv2("datos.csv")
+library(readr)
+datos <- read_rds(here('data','raw','datos.rds'))
 datos <- as.data.table(datos)
 datos <- datos[, lapply(.SD, iconv, "latin1", "UTF-8")]
 
