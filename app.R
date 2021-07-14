@@ -86,7 +86,8 @@ ui <- fluidPage(
                  numericInput("min","Valor mínimo",value=500),
                  numericInput("max","Valor máximo",value=5000),
                  "Los valores oscilan entre 0 y 148000000",
-                 plotOutput("hist")),
+                 plotOutput("hist"),
+                 tableOutput("prop")),
         
         tabPanel("Relación cantidad y valor",
                  selectInput("color","Variable en color",c("aduana","infraccion","estado_incautacion")),
@@ -148,6 +149,9 @@ server <- function(input, output){
         atipicocantidad<-quantile(as.numeric(datos$cantidad),probs=0.75)+1.5*(quantile(as.numeric(datos$cantidad),probs=0.75)-quantile(as.numeric(datos$cantidad),probs=0.25))
         
         datos %>% mutate(INC_CANTIDAD=round(as.numeric(cantidad),0),INC_VALOR_MN=round(as.numeric(valor),0))%>% filter(INC_VALOR_MN<atipicovalor)%>% filter(INC_CANTIDAD<atipicocantidad)%>% ggplot(aes(x=INC_VALOR_MN,y=INC_CANTIDAD,colour=.data[[input$color]]))+geom_point()+theme(aspect.ratio = 1)
+    })
+    output$prop<-renderTable({
+        datos %>% group_by(aduana) %>% summarise(conteo=n()) %>% mutate(proporcion=conteo/sum(conteo))
     })
 }
 
