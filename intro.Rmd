@@ -11,9 +11,9 @@ En el caso de este grupo en cuestión, se analizarán datos de incautaciones de 
 ```{r,echo=FALSE}
 
 library(tidyverse)
-
-datos <- read_csv2('datos.csv')
-
+library(readr)
+datos <- read_rds(here('data','raw','datos.rds'))
+                                                                                                                                                                                                                                                                
 dim(datos)
 
 ```
