@@ -123,11 +123,17 @@ datos%>%
   group_by(aduana) %>%
   summarise(conteo=n()) %>% ggplot(aes(x=fct_reorder(aduana,conteo),y=conteo))+geom_col()+theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+labs(y='Cantidad de incautaciones',x='Aduana')
 ```
-```{r,echo=FALSE,fig.cap=}
+```{r,echo=FALSE,fig.cap="En el grafico se puede observar claramente como la mayor cantidad de incautaciones de dan en las aduanas del este y norte, las de procedencia brasilera. Y como tambien por parte de argentina pasa lo mismo, pero con aduanas del oeste, en cuanto a las incautaciones provenientes de EEUU todas son incautadas en Carrasco algo que puede tener que ver con el tipo de bien y el nivel adquisitivo"}
 tabla2 <- subset(data.frame( table(datos$pais_procedencia)),Freq>1000)
 aduanas <- subset(datos, pais_procedencia %in% tabla2$Var1)
 tabla2<- data.frame( with(aduanas, table(aduana, pais_procedencia) ) )
-ggplot(tabla2) + geom_tile(aes(x=aduana, y=pais_procedencia, fill=Freq))+ theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+scale_fill_gradient(low="white",high="blue")+labs(x="Pais de procedencia",y="Aduana")
+
+tabla2<- tabla2%>%
+  group_by(aduana)%>%
+  filter(Freq > 300)
+
+
+ggplot(tabla2) + geom_tile(aes(x=aduana, y=pais_procedencia, fill=Freq,width = 1, height = 0.8))+ theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+scale_fill_gradient(low="white",high="blue")+labs(y="Pais de procedencia",x="Aduana")
 ```
 
 Como último objetivo, decidimos investigar el estado en el que se encuantra cada incautación, intentando observar cuál infracción demora más tiempo en resolverse.
