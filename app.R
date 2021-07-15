@@ -4,6 +4,7 @@ library(lubridate)
 library(ggpmisc)
 library(data.table)
 library(readr)
+library(hexbin)
 datos <- read_rds(here('data','raw','datos.rds'))
 datos <- as.data.table(datos)
 datos <- datos[, lapply(.SD, iconv, "latin1", "UTF-8")]
@@ -133,8 +134,7 @@ server <- function(input, output){
             })
     
     output$caja<-renderPlot({
-        
-        datos %>% 
+            datos %>%
             mutate(pais_procedencia = recode(pais_procedencia, `CHINA, REPUBLICA POPULAR DE` = "CHINA",
                                    `UNITED STATES MINOR OUTLYING ISLANDS`= "USA",`RUSIA(FEDERACION RUSA)`="RUSIA")) %>%
             group_by(tipo,fecha_incautacion,pais_procedencia) %>% 
@@ -148,7 +148,7 @@ server <- function(input, output){
         
         atipicocantidad<-quantile(as.numeric(datos$cantidad),probs=0.75)+1.5*(quantile(as.numeric(datos$cantidad),probs=0.75)-quantile(as.numeric(datos$cantidad),probs=0.25))
         
-        datos %>% mutate(INC_CANTIDAD=round(as.numeric(cantidad),0),INC_VALOR_MN=round(as.numeric(valor),0))%>% filter(INC_VALOR_MN<atipicovalor)%>% filter(INC_CANTIDAD<atipicocantidad)%>% ggplot(aes(x=INC_VALOR_MN,y=INC_CANTIDAD,colour=.data[[input$color]]))+geom_point()+theme(aspect.ratio = 1)
+        datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad,fill=.data[[input$color]]))+geom_hex(size=1/2)+theme(aspect.ratio = 1)
     })
     output$prop<-renderTable({
         datos %>% group_by(aduana) %>% summarise(conteo=n()) %>% mutate(proporcion=conteo/sum(conteo))
