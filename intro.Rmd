@@ -142,7 +142,15 @@ tabla<-data.frame(estado=c("Contencioso Final","Contencioso Inicial","Falsificac
 ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradient(low="grey",high="blue")+geom_text(aes(label=Freq))
 ```
 
-Shiny
+Al terminar con la exploración, el siguiente paso crear una Shiny web App con el objetivo de transmitir de una manera amigable con el usuario las princiaples exploraciones conseguidas.
+
+###link
+
+Dentro de la app, lo primero que se quiso comunicar fue información exclusiva de cada tipo de incautación. La forma de lograr esto fue incorporar un menú desplegable, de donde el usuario puede elegir el tipo de incautación que más le interese. Se muestran dos gráficos con respecto a ellos. El primero es similar a la evolución total de incautaciones realizada anteoriormente , pero especifico para cada tipo de incautación. Y el segundo permite visualizar de qué países provinieron esas incautaciones.
+
+En el siguiente panel, se observa la cantidad total de incautaciones según la infracción realizada, permitiendo observar individualemente la evolución de cada una de ellas.
+
+Más adelante, se permite delimitar el rango de valores que se quieren obervar dentro del gráfico que muestra las incautaciones que ha realizado cada aduana durante los últimos años. Es una gran forma de observar en qué aduanas se concenrtan las incautaciones de mayor o menor valor 
 
 
 Conlusiones finales
