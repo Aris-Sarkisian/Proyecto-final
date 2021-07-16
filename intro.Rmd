@@ -9,22 +9,22 @@ En el caso de este grupo en cuestión, se analizarán datos de incautaciones de 
 
 
 ```{r,echo=FALSE}
-
+library(here)
 library(tidyverse)
-
-datos <- read_csv2('datos.csv')
+library(readr)
+datos <- read_rds(here('data','raw','datos.rds'))
 
 dim(datos)
 
 ```
 
-Los datos  fueron obtenidos en el catalogo de datos abiertos que puso a disposición el gobierno uruguayo. Más específicamente estos fueron subidos por la Dirección Nacional de Aduanas. Cuentan con 16 variables y 76.792 observaciones. Tres de las varibles son de tipo double, mientras que las restantes son de tipo caracter.   
+Los datos  fueron obtenidos en el catalogo de datos abiertos que puso a disposición el gobierno uruguayo. Más específicamente estos fueron subidos por la Dirección Nacional de Aduanas. Cuentan con 16 variables y 76.792 observaciones. Tres de las varibles son de tipo double, mientras que las restantes son de tipo caracter. Cada observación se refiere a una incautación realizada, y ofrece información soobre ella.Las variables que utilizaremos son:
 
 ```{r,echo=FALSE}
 
-datos <- datos %>%
   
-            rename(fecha_incautacion = TIEM_DIA_SK_INCAUTACION ,
+datos<- datos%>%   
+  rename(fecha_incautacion = TIEM_DIA_SK_INCAUTACION ,
                    aduana = ADUA_ADUA_DESCC , 
                    infraccion = INFR_INFR_DESCC ,
                    pais_procedencia = PAIS_PAIS_DESCC_PAIS_PROCEDENC ,
@@ -44,6 +44,14 @@ datos <- datos %>%
                    cantidad,
                    valor) 
 
+datos <- datos %>%
+  mutate(aduana = recode(aduana, `SEDE REGIONAL SUROESTE(BAJA)` = "SEDE SUDOESTE",
+`SEDE REGIONAL LITORAL NORESTE(BAJA)`= "SEDE NORESTE",`SEDE REGIONAL OESTE(ANTES NOROESTE)` = "SEDE OESTE"))
+
+datos<- datos %>% 
+            mutate(pais_procedencia = recode(pais_procedencia, `CHINA, REPUBLICA POPULAR DE` = "CHINA",
+                                   `UNITED STATES MINOR OUTLYING ISLANDS`= "USA",`RUSIA(FEDERACION RUSA)`="RUSIA"))
+
 glimpse(datos)
 
 ```
@@ -51,13 +59,13 @@ glimpse(datos)
 ```{r,echo=FALSE}
 
 #cambiar tildes y ñ
-
-lapply(datos, gsub, pattern = "Á", replacement = "A")
-lapply(datos, gsub, pattern = "É", replacement = "E")
-lapply(datos, gsub, pattern = "Í", replacement = "I")
-lapply(datos, gsub, pattern = "Ó", replacement = "O")
-lapply(datos, gsub, pattern = "Ú", replacement = "U")
-lapply(datos, gsub, pattern = "Ñ", replacement = "N")
+# 
+# lapply(datos, gsub, pattern = "Á", replacement = "A")
+# lapply(datos, gsub, pattern = "É", replacement = "E")
+# lapply(datos, gsub, pattern = "Í", replacement = "I")
+# lapply(datos, gsub, pattern = "Ó", replacement = "O")
+# lapply(datos, gsub, pattern = "Ú", replacement = "U")
+# lapply(datos, gsub, pattern = "Ñ", replacement = "N")
 
 library(data.table)
 
@@ -66,49 +74,66 @@ datos <- datos[, lapply(.SD, iconv, "latin1", "UTF-8")]
 
 ```
 
+```{r,echo=FALSE}
+data.frame(variable=c("fecha_incautacion","aduana","infraccion","pais_procedencia", "estado_incautacion","tipo","cantidad","valor"),descrpición=c("Fecha en que se registró","Aduana en que se realizó","Descrición del crimen realizado","País de donde provenía","Estado en el que se encuentra actualmente","Producto incautado","Cantidad incautada","Valor total en $"))
+```
+
 Para realizar la exploración, nos planteamos algunas preguntas para orientar el análisis. En primer lugar, decidimos investigar de qué manera había evolucionado la cantidad total de incautaciones durante el período en cuestión, teniendo en cuenta las diferentes infracciones que se pueden realizar.
 
-```{r,echo=FALSE,fig.cap= Se puede ver un aumento en la cantidad de incautaciones en el correr del año con un gran descenso en el verano diciembre-enero, puede deberse a un menor control aduanero y un enfoque en el turismo, o por un menor comercio en esta época. Se puede ver también como el covid no disminuyó las incautaciones}
+```{r,echo=FALSE,fig.cap="Se puede ver un aumento en la cantidad de incautaciones en el correr del año con un gran descenso en el verano diciembre-enero, puede deberse a un menor control aduanero y un enfoque en el turismo, o por un menor comercio en esta época. Se puede ver también como el covid no disminuyó las incautaciones"}
 library(ggpmisc)
+library(ggplot2)
 library(lubridate)
 datos %>% mutate(fecha=ym(fecha_incautacion)) %>% group_by(fecha) %>% summarise(conteo=n()) %>% ggplot(aes(x=fecha,y=conteo))+geom_line()+stat_peaks()+stat_peaks(geom="text",color="black",vjust=-0.3)+labs(x="Fecha de la incautación",y="Cantidad de incautaciones")
 ```
-```{r,echo=FALSE,fig.cap= Los bajos datos del año 2021 se debe a que los datos llegan solo hasta mitad de año. Existe un claro aumento desde el 2018 a 2019 en todos los tipos de incautaciones, puede ser por un mayor control en las aduanas o un cambio de politica, hay un gran pico de falsificaciones en 2019, mientras que en el 2020 los otros tipos de incautaciones frecuentaron más}
-datos %>% separate(fecha_incautacion, into=c("anio","mes"),sep=4) %>%group_by(infraccion,anio) %>% summarise(conteo=n()) %>% ggplot(aes(x=anio,y=conteo))+geom_col()+facet_wrap(~infraccion,scales="free")+labs(x="Año",y="Cantidad")
+```{r,echo=FALSE,fig.cap="Los bajos datos del año 2021 se debe a que los datos llegan solo hasta mitad de año. Existe un claro aumento desde el 2018 a 2019 en todos los tipos de incautaciones, puede ser por un mayor control en las aduanas o un cambio de politica, hay un gran pico de falsificaciones en 2019, mientras que en el 2020 los otros tipos de incautaciones frecuentaron más"}
+datos %>% separate(fecha_incautacion, into=c("anio","mes"),sep=4) %>%group_by(infraccion,anio) %>% summarise(conteo=n()) %>% ggplot(aes(x=anio,y=conteo,fill=anio))+geom_col()+facet_wrap(~infraccion,scales="free")+labs(x="Año",y="Cantidad")+ scale_fill_manual("Año",values=c("green","yellow","orange","red"))
 ```
 
 Luego decidimos analizar más en profundidad la variable "Valor", que indica el valor de la incautación realizada en cada caso. Para hacer esto, iniciamos observando la distribución de la variable, para luego adentrarnos en la relación que tiene el valor (medido en pesos) con la cantidad de incautaciones incautadas.
 
-```{r,echo=FALSE,fig.cap= Se puede observar una clara relación entre el valor y la cantidad, dado que la mayoria de las incautaciones son de un bajo valor}
-datos %>% filter(as.numeric(valor)<atipicovalor) %>%ggplot(aes(x=as.numeric(valor)))+geom_histogram(bins=30)+labs(x="Valor en U$",y="Cantidad de incautaciones")
+```{r,echo=FALSE,fig.cap="Se puede observar una clara relación entre el valor y la cantidad, dado que la mayoria de las incautaciones son de un bajo valor"}
+
+atipicovalor<-quantile(as.numeric(datos$valor),probs=0.75)+1.5*(quantile(as.numeric(datos$valor),probs=0.75)-quantile(as.numeric(datos$valor),probs=0.25))
+
+datos %>% filter(as.numeric(valor)< atipicovalor) %>%ggplot(aes(x=as.numeric(valor)))+geom_histogram(bins=30)+labs(x="Valor en U$",y="Cantidad de incautaciones")
 ```
 
-```{r,echo=FALSE,fig.cap= se observa una correlacion casi nula entre las variables y una clara tendencia a que las incauaciones sean de bajo valor y cantidad}
-atipicovalor<-quantile(as.numeric(datos$valor),probs=0.75)+1.5*(quantile(as.numeric(datos$valor),probs=0.75)-quantile(as.numeric(datos$valor),probs=0.25))
+```{r,echo=FALSE,fig.cap="Se observa una correlacion casi nula entre las variables y una clara tendencia a que las incauaciones sean de bajo valor y cantidad"}
+
+library(plotly)
+library(hexbin)
 
 atipicocantidad<-quantile(as.numeric(datos$cantidad),probs=0.75)+1.5*(quantile(as.numeric(datos$cantidad),probs=0.75)-quantile(as.numeric(datos$cantidad),probs=0.25))
 
-datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad))+geom_point(alpha=1/8,size=1)+theme(aspect.ratio = 1)+labs(x="Valor en U$",y="Cantidad")
+
+grafico<-datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad))+geom_hex()
+
+ggplotly(grafico)
 ```
-```{r,echo=FALSE,fig.cap=}
+
+```{r,echo=FALSE}
 cor(as.numeric(datos$cantidad),as.numeric(datos$valor))
 ```
 
 A continuación nos enfocamos en la variable "aduana", que hace referencia al lugar dentro del Uruguay que se realizó el acto de incautar. Como primer paso se investigó de que manera se distribuyen las incautaciones totales dentro del territorio nacional. Sucesivamente, nos interesó saber el destino de cada uno de estos actos, sabiendo también el origen.
 
-```{r,echo=FALSE,fig.cap= Hay una clara mayor cantidad de incautaciones en las aduanas del este y norte, se debe al mercado con el pais froterizo Brasil, el cual se diferencia claramente de las aduanas del oeste}
+```{r,echo=FALSE,fig.cap="Hay una clara mayor cantidad de incautaciones en las aduanas del este y norte, se debe al mercado con el pais froterizo Brasil, el cual se diferencia claramente de las aduanas del oeste"}
 datos%>%
-  select(aduana)%>%
-  mutate(aduana = recode(aduana, `SEDE REGIONAL SUROESTE(BAJA)` = "SEDE SUDOESTE",
-`SEDE REGIONAL LITORAL NORESTE(BAJA)`= "SEDE NORESTE",`SEDE REGIONAL OESTE(ANTES NOROESTE)` = "SEDE OESTE")) %>%
   group_by(aduana) %>%
   summarise(conteo=n()) %>% ggplot(aes(x=fct_reorder(aduana,conteo),y=conteo))+geom_col()+theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+labs(y='Cantidad de incautaciones',x='Aduana')
 ```
-```{r,echo=FALSE,fig.cap=}
-tabla2 <- subset(data.frame( table(datos$aduana)))
-aduanas <- subset(datos, aduana %in% tabla2$Var1)
-tabla2<- data.frame( with(aduanas, table(pais_procedencia, aduana) ) )
-ggplot(tabla2) + geom_tile(aes(x=pais_procedencia, y=aduana, fill=Freq))+ theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+scale_fill_gradient(low="white",high="black")+labs(x="Pais de procedencia",y="Aduana")
+```{r,echo=FALSE,fig.cap="En el grafico se puede observar claramente como la mayor cantidad de incautaciones de dan en las aduanas del este y norte, las de procedencia brasilera. Y como tambien por parte de argentina pasa lo mismo, pero con aduanas del oeste, en cuanto a las incautaciones provenientes de EEUU todas son incautadas en Carrasco algo que puede tener que ver con el tipo de bien y el nivel adquisitivo"}
+tabla2 <- subset(data.frame( table(datos$pais_procedencia)),Freq>1000)
+aduanas <- subset(datos, pais_procedencia %in% tabla2$Var1)
+tabla2<- data.frame( with(aduanas, table(aduana, pais_procedencia) ) )
+
+tabla2<- tabla2%>%
+  group_by(aduana)%>%
+  filter(Freq > 300)
+
+
+ggplot(tabla2) + geom_tile(aes(x=aduana, y=pais_procedencia, fill=Freq,width = 1, height = 0.8))+ theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+scale_fill_gradient(low="white",high="blue")+labs(y="Pais de procedencia",x="Aduana")
 ```
 
 Como último objetivo, decidimos investigar el estado en el que se encuantra cada incautación, intentando observar cuál infracción demora más tiempo en resolverse.

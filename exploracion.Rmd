@@ -1,7 +1,7 @@
 ```{r}
 library(tidyverse) 
 library(lubridate)
-datos<-read_delim("datos.csv",delim=";")
+datos<-read_csv2("datos.csv")
 ```
 ```{r}
 library(data.table)
@@ -67,5 +67,28 @@ datos %>% mutate(INC_CANTIDAD=round(as.numeric(INC_CANTIDAD),0),INC_VALOR_MN=rou
 datos %>% group_by(INFR_INFR_DESCC,ESTINC_ESTINC_DESCC) %>% summarise(conteo=n())
 tabla<-data.frame(estado=c("Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador"),infraccion=c("Abandono","Abandono","Abandono","Abandono","Abandono","Contrabando","Contrabando","Contrabando","Contrabando","Contrabando","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Receptacion","Receptacion","Receptacion","Receptacion","Receptacion"),Freq=c(17362,399,365,438,2,54169,2090,1004,416,314,101,0,3,0,0,129,0,0,0,0))
 ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradient(low="white",high="blue")
+```
+
+```{r}
+tabla2 <- subset(data.frame( table(datos$ADUA_ADUA_DESCC)))
+aduanas <- subset(datos, ADUA_ADUA_DESCC %in% tabla2$Var1)
+tabla2<- data.frame( with(aduanas, table(PAIS_PAIS_DESCC_PAIS_PROCEDENC, ADUA_ADUA_DESCC) ) )
+ggplot(tabla2) + geom_tile(aes(x=PAIS_PAIS_DESCC_PAIS_PROCEDENC, y=ADUA_ADUA_DESCC, fill=Freq))+ theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+scale_fill_gradient(low="white",high="black")
+```
+
+```{r}
+datos %>% group_by(PAIS_PAIS_DESCC_PAIS_PROCEDENC) %>% summarise(conteo=n()) %>% arrange(desc(conteo))
+```
+
+```{r}
+datos %>% group_by(ADUA_ADUA_DESCC) %>% summarise(conteo=n()) %>% mutate(proporcion=conteo/sum(conteo))
+```
+```{r}
+atipicovalor<-quantile(as.numeric(datos$INC_VALOR_MN),probs=0.75)+1.5*(quantile(as.numeric(datos$INC_VALOR_MN),probs=0.75)-quantile(as.numeric(datos$INC_VALOR_MN),probs=0.25))
+
+atipicocantidad<-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)+1.5*(quantile(as.numeric(datos$INC_CANTIDAD),probs=0.75)-quantile(as.numeric(datos$INC_CANTIDAD),probs=0.25))
+
+grafico<-datos %>% mutate(INC_CANTIDAD=round(as.numeric(INC_CANTIDAD),0),INC_VALOR_MN=round(as.numeric(INC_VALOR_MN),0))%>% filter(INC_VALOR_MN<atipicovalor)%>% filter(INC_CANTIDAD<atipicocantidad)%>% ggplot(aes(x=INC_VALOR_MN,y=INC_CANTIDAD))+geom_hex()
+ggplotly(grafico)
 ```
 
