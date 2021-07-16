@@ -3,3 +3,10 @@
 .RData
 .Ruserdata
 *.Rproj
+v_da_ft_recaudacion_csv.zip
+# Solo omitir recaudación
+recaudacion.rds
+# Omitir todos
+# recaudacion*.rds
+# Omitir todos los subarchivos de recaudación
+# recaudacion[0-9]*.rds
