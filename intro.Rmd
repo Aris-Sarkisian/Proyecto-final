@@ -54,6 +54,14 @@ datos<- datos %>%
 
 glimpse(datos)
 
+Variables<-c("fecha_incautacion","aduana","infraccion","pais_procedencia","unidad","estado_incautacion","tipo","cantidad","valor")
+Definicion<-c("Fecha en la cual fue incautada la mercaderia","Ubicacion de la aduana(Local)","Tipo de infraccion cometida","Pais del cual procede la mercaderia incautada","Unidades de medida en la cual esta medida la mercaderia","Estado en el cual se encuentra dicha incautacion ,(Contensioso(Final o inicial),Falsificador, Valorador,Ingresado)","Tipo de mercaderia incautada","Cantidad de unidades incautadas medidas con respecto a la variable 'unidad'","Valor de dicha de la mercaderia incautada medida en U$")
+
+a<-data.frame(cbind(Variables,Definicion))
+
+a %>% xtable(caption="Descripcion de las variables") %>% print(include.rownames = FALSE)
+
+
 ```
 
 ```{r,echo=FALSE}
