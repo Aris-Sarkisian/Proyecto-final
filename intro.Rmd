@@ -59,7 +59,6 @@ glimpse(datos)
 ```{r,echo=FALSE}
 
 #cambiar tildes y ñ
-# 
 # lapply(datos, gsub, pattern = "Á", replacement = "A")
 # lapply(datos, gsub, pattern = "É", replacement = "E")
 # lapply(datos, gsub, pattern = "Í", replacement = "I")
