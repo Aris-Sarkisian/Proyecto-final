@@ -139,7 +139,7 @@ tabla<-data.frame(estado=c("Contencioso Final","Contencioso Inicial","Falsificac
 ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradient(low="grey",high="blue")+geom_text(aes(label=Freq))
 ```
 
-Al terminar con la exploración, el siguiente paso fue crear una Shiny web App con el objetivo de transmitir de una manera amigable con el usuario las princiaples exploraciones conseguidas.
+Al terminar con la exploración, el siguiente paso fue crear una Shiny web App con el objetivo de transmitir de una manera amigable con el usuario las principales exploraciones conseguidas.
 
 ###link
 
@@ -147,7 +147,9 @@ Dentro de la app, lo primero que se quiso comunicar fue información exclusiva d
 
 En el siguiente panel, se observa la cantidad total de incautaciones según la infracción realizada, permitiendo observar individualemente la evolución de cada una de ellas.
 
-Más adelante, se permite delimitar el rango de valores que se quieren obervar dentro del gráfico que muestra las incautaciones que ha realizado cada aduana durante los últimos años. Es una gran forma de observar en qué aduanas se concenrtan las incautaciones de mayor o menor valor 
+Más adelante, se permite delimitar el rango de valores que se quieren obervar dentro del gráfico que muestra las incautaciones que ha realizado cada aduana durante los últimos años. Es una gran forma de observar en qué aduanas se concentran las incautaciones de mayor o menor valor.
+
+Para finalizar, se agregó el gráfico que relaciona valor y cantidad de artículos, pudiendo seleccionar según cuál variable categorica se pretende pintar el interior. Solo se seleccionaron las variables que el gráfico resultante permitiera sacar algún tipo se conclusión. 
 
 
 Conlusiones finales

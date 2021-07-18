@@ -5,6 +5,8 @@ library(ggpmisc)
 library(data.table)
 library(readr)
 library(hexbin)
+library(here)
+
 datos <- read_rds(here('data','raw','datos.rds'))
 datos <- as.data.table(datos)
 datos <- datos[, lapply(.SD, iconv, "latin1", "UTF-8")]
@@ -42,18 +44,18 @@ ui <- fluidPage(
                  "INCAUTACIONES",
         tabPanel("Tipo de incautacion",
                  selectInput("artefacto",
-                             "Tipo de incautación",c('ANTEOJOS', 'APARATOS PARA TELEFONIA Y ACCESORIOS ' ,
-                                                                 'ARMAS Y SUS ACCESORIOS' , 'ARTICULOS DE PIROTECNIA' , 
+                             "Tipo de incautación",c('ANTEOJOS',
+                                                                 'ARMAS Y SUS ACCESORIOS', 
                                                                  'ARTICULOS DE ELECTRICIDAD' , 'ARTICULOS DE MOBILIARIO' ,
-                                                                 'ARTICULOS DE OFICINA Y MANUFACTURAS DE PAPEL Y CARTON' ,
+                                                                 
                                                                  'ARTICULOS DE OPTICA' , 'ARTICULOS PARA EL HOGAR' , 
                                                                  'BALANZAS ELECTRONICAS' , 'BEBIDAS' , 'BIJOU' ,
-                                                                 'BILLETERAS Y MONEDEROS' , 'CALZADOS' , 'CAMPING' , 'CARBON' ,
-                                                                 'CD' , 'CIGARROS' , 'COMBUSTIBLES' , 'COMESTIBLES' , 
+                                                                 'BILLETERAS Y MONEDEROS' , 'CALZADOS' , 'CAMPING' ,
+                                                                 'CD' , 'COMBUSTIBLES' , 'COMESTIBLES' , 
                                                                  'COMUNICACIONES' , 'CONSTRUCCION' , 
-                                                                 'COSMETICOS Y PRODUCTOS DE LIMIPIEZA' , 
-                                                                 'COTILLON, ACCESORIOS PARA FIESTAS Y CUMPLEANIOS',
-                                                                 'CUERO Y SUS DERIVADOS' , 'DINERO' , 'DROGAS' ,
+                                                                  
+                                                                 
+                                                                  'DINERO' , 'DROGAS' ,
                                                                  'ELECTRODOMESTICOS Y APARATOS OPTICOS' ,
                                                                  'ENVASES DE PLASTICO, LATA, VIDRIO, DIVERSOS MATERIALES' ,
                                                                  'ESPEJOS' , 'HERRAMIENTAS' , 'INFORMATICO' ,
