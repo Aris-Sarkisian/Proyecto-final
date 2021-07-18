@@ -5,7 +5,7 @@ output:
 ---
 
 Este proyecto nace como un instrumento para poder aplicar los contenidos aprendidos durante el semestre en un problema real. Se tendrá que demostrar los conocimentos adquiridos al realizar un analisis exploratorio sobre datos de interes nacional, poniendo especial énfasis en la correcta visualización de los resultados obtenidos, realizando una correcta interpretación de la misma. 
-En el caso de este grupo en cuestión, se analizarán datos de incautaciones de aduana presentados por la Dirección Nacional de Aduanas, que fueron elegidos  Para llevar a cabo estos objetivos, se utilizará exclusivamente el lenguaje de programación R, y sus respectivas expansiones, como Markdown, Shiny y RStudio.
+En el caso de este grupo en cuestión, se analizarán datos de incautaciones de aduana presentados por la Dirección Nacional de Aduanas, que fueron elegidos  Para llevar a cabo estos objetivos, relacionando tipos y el valor las de inacutaciones, cantidades, procedencia, entre otras variables. Se utilizará exclusivamente el lenguaje de programación R, y sus respectivas expansiones, como Markdown, Shiny y RStudio.
 
 
 ```{r,echo=FALSE}
@@ -64,14 +64,6 @@ a %>% xtable(caption="Descripcion de las variables") %>% print(include.rownames 
 ```
 
 ```{r,echo=FALSE}
-
-#cambiar tildes y ñ
-# lapply(datos, gsub, pattern = "Á", replacement = "A")
-# lapply(datos, gsub, pattern = "É", replacement = "E")
-# lapply(datos, gsub, pattern = "Í", replacement = "I")
-# lapply(datos, gsub, pattern = "Ó", replacement = "O")
-# lapply(datos, gsub, pattern = "Ú", replacement = "U")
-# lapply(datos, gsub, pattern = "Ñ", replacement = "N")
 
 library(data.table)
 
@@ -147,7 +139,7 @@ tabla<-data.frame(estado=c("Contencioso Final","Contencioso Inicial","Falsificac
 ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradient(low="grey",high="blue")+geom_text(aes(label=Freq))
 ```
 
-Al terminar con la exploración, el siguiente paso crear una Shiny web App con el objetivo de transmitir de una manera amigable con el usuario las princiaples exploraciones conseguidas.
+Al terminar con la exploración, el siguiente paso fue crear una Shiny web App con el objetivo de transmitir de una manera amigable con el usuario las princiaples exploraciones conseguidas.
 
 ###link
 
@@ -159,3 +151,4 @@ Más adelante, se permite delimitar el rango de valores que se quieren obervar d
 
 
 Conlusiones finales
+

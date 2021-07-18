@@ -36,22 +36,13 @@ datos <- datos %>%
     
 
 ui <- fluidPage(
-    
-    navlistPanel(id = "tabset",
+    navlistPanel(
+        id = "tabset",
                  
-                 "Incautaciones",
-                 
-        tabPanel('Introduccion' , 'Este proyecto nace como un instrumento para poder aplicar los contenidos 
-                 aprendidos durante el semestre en un problema real. Se tendrá que demostrar los conocimentos adquiridos 
-                 al realizar un analisis exploratorio sobre datos de interes nacional, poniendo especial énfasis en la 
-                 correcta visualización de los resultados obtenidos, realizando una correcta interpretación de la misma. 
-                 En el caso de este grupo en cuestión, se analizarán datos de incautaciones de aduana presentados por 
-                 la Dirección Nacional de Aduanas, relacionando tipos y el valor las de inacutaciones, cantidades, procedencia, 
-                 estos fueron elegidos  para llevar a cabo estos objetivos, se utilizará 
-                 exclusivamente el lenguaje de programación R, y sus respectivas expansiones, como Markdown, Shiny y RStudio.'),
-        
+                 "INCAUTACIONES",
         tabPanel("Tipo de incautacion",
-                 selectInput("artefacto","Tipo de incautación",c('ANTEOJOS', 'APARATOS PARA TELEFONIA Y ACCESORIOS ' ,
+                 selectInput("artefacto",
+                             "Tipo de incautación",c('ANTEOJOS', 'APARATOS PARA TELEFONIA Y ACCESORIOS ' ,
                                                                  'ARMAS Y SUS ACCESORIOS' , 'ARTICULOS DE PIROTECNIA' , 
                                                                  'ARTICULOS DE ELECTRICIDAD' , 'ARTICULOS DE MOBILIARIO' ,
                                                                  'ARTICULOS DE OFICINA Y MANUFACTURAS DE PAPEL Y CARTON' ,
@@ -93,7 +84,7 @@ ui <- fluidPage(
         tabPanel("Relación cantidad y valor",
                  selectInput("color","Variable en color",c("aduana","infraccion","estado_incautacion")),
                  plotOutput("puntos"))
-    )
+        ),img(src = "imagen.png", height = 240, width = 180)
 )
 
 server <- function(input, output){
@@ -108,7 +99,7 @@ server <- function(input, output){
                                    `SEDE REGIONAL LITORAL NORESTE(BAJA)`= "SEDE NORESTE",`SEDE REGIONAL OESTE(ANTES NOROESTE)` = "SEDE OESTE")) %>%
             group_by(aduana) %>% 
             summarise(conteo=n()) %>% 
-            ggplot(aes(x=fct_reorder(aduana,conteo),y=conteo))+geom_col()+labs(x="Aduana",y="Cantidad")+
+            ggplot(aes(x=fct_reorder(aduana,conteo),y=conteo,fill=aduana))+geom_col(colour="black",fill="cyan")+labs(x="Aduana",y="Cantidad")+
             theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))
     })
     
@@ -119,7 +110,7 @@ server <- function(input, output){
             group_by(infraccion,anio) %>% 
             summarise(conteo=n()) %>% 
             subset(subset=grepl(input$crimen,infraccion)) %>% 
-            ggplot(aes(x=anio,y=conteo))+geom_col(fill="blue")+labs(x="Año",y="Cantidad")
+            ggplot(aes(x=anio,y=conteo))+geom_col(fill="lightblue",colour="black")+labs(x="Año",y="Cantidad")
     })
     
     output$linea<-renderPlot({
@@ -129,7 +120,7 @@ server <- function(input, output){
             group_by(tipo,fecha_incautacion) %>% 
             summarise(conteo=n()) %>% 
             subset(subset=grepl(input$artefacto,tipo)) %>% 
-            ggplot(aes(x=fecha_incautacion ,y=conteo))+geom_line(color="purple")+labs(x="Fecha de incautación",y="Cantidad")+stat_peaks(color="purple")+stat_peaks(geom="text",color="purple",vjust=-0.3)
+            ggplot(aes(x=fecha_incautacion ,y=conteo))+geom_line(color="blue")+labs(x="Fecha de incautación",y="Cantidad")+stat_peaks(color="purple")+stat_peaks(geom="text",color="black",vjust=-0.3)
             
             })
     
@@ -140,7 +131,7 @@ server <- function(input, output){
             group_by(tipo,fecha_incautacion,pais_procedencia) %>% 
             summarise(conteo=n()) %>% 
             subset(subset=grepl(input$artefacto,tipo)) %>% 
-            ggplot()+geom_boxplot(aes(x=reorder(pais_procedencia,conteo,median),y=conteo))+labs(x="País de procedencia",y="Cantidad")+theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))
+            ggplot+geom_boxplot(aes(x=reorder(pais_procedencia,conteo,median),y=conteo,fill=pais_procedencia))+labs(x="País de procedencia",y="Cantidad")+theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))
     })
     
     output$puntos<-renderPlot({
