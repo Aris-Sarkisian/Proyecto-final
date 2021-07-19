@@ -112,14 +112,15 @@ ggplotly(grafico)
 cor(as.numeric(datos$cantidad),as.numeric(datos$valor))
 ```
 
- A continuación nos enfocamos en la variable "aduana", que hace referencia al lugar dentro del Uruguay que se realizó el acto de incautar. Como primer paso se investigó de que manera se distribuyen las incautaciones totales dentro del territorio nacional. Sucesivamente, nos interesó saber el destino de cada uno de estos actos, sabiendo también el origen.
+ A continuación nos enfocamos en la variable "aduana", que hace referencia al lugar dentro del Uruguay que se realizó el acto de incautar. Como primer paso se investigó de que manera se distribuyen las incautaciones totales dentro del territorio nacional. Sucesivamente, nos interesó saber el destino de cada uno de estos actos, sabiendo también el origen.Se utlizaron solo los destinos con más de 300 observaciones debido a la gran cantidad de países con muy pocos datos. 
 
 ```{r,echo=FALSE,fig.cap="Hay una clara mayor cantidad de incautaciones en las aduanas del este y norte, se debe al mercado con el pais fronterizo Brasil, el cual se diferencia claramente de las aduanas del oeste"}
 library(forcats)
 datos %>% group_by(aduana) %>% summarise(conteo=n()) %>% ggplot(aes(x=fct_reorder(aduana,conteo),y=conteo))+geom_col(fill="cyan",colour="black")+theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+labs(y='Cantidad de incautaciones',x='Aduana')
 ```
 
-```{r,echo=FALSE,fig.cap="En el grafico se puede observar claramente como la mayor cantidad de incautaciones de dan en las aduanas del este y norte, las de procedencia brasilera. Y como tambien por parte de argentina pasa lo mismo, pero con aduanas del oeste, en cuanto a las incautaciones provenientes de EEUU todas son incautadas en Carrasco algo que puede tener que ver con el tipo de bien y el nivel adquisitivo"}
+```{r,echo=FALSE,fig.cap="En el grafico se puede observar claramente como la mayor cantidad de incautaciones de dan en las aduanas del este y norte, las de procedencia brasilera. Y como tambien por parte de Argentina pasa lo mismo, pero con aduanas del oeste. En cuanto a las incautaciones provenientes de EEUU todas son incautadas en Carrasco algo que puede tener que ver con el tipo de bien y el nivel adquisitivo"}
+
 tabla2 <- subset(data.frame( table(datos$pais_procedencia)),Freq>1000)
 aduanas <- subset(datos, pais_procedencia %in% tabla2$Var1)
 tabla2<- data.frame( with(aduanas, table(aduana, pais_procedencia) ) )
@@ -127,7 +128,6 @@ tabla2<- data.frame( with(aduanas, table(aduana, pais_procedencia) ) )
 tabla2<- tabla2%>%
   group_by(aduana)%>%
   filter(Freq > 300)
-
 
 ggplot(tabla2) + geom_tile(aes(x=aduana, y=pais_procedencia, fill=Freq,width = 1, height = 0.8))+ theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+scale_fill_gradient(low="white",high="blue")+labs(y="Pais de procedencia",x="Aduana")
 ```
@@ -153,6 +153,5 @@ ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradie
  Para finalizar, se agregó el gráfico que relaciona valor y cantidad de artículos, pudiendo seleccionar según cuál variable categorica se pretende pintar el interior. Solo se seleccionaron las variables que el gráfico resultante permitiera sacar algún tipo se conclusión. 
 
 
- Luego de esta exploración pudimos observar como la aparicion del covid-19 no disminuyo la cantidad de incautaciones, sino que hasta aumentaron en gran medida en comparacion con el 2019, tambien que la mayoria son de un muy bajo valor,  una clara mayor cantidad de incautaciones de procedencia brasileña en comparacion con el otro pais fronterizo(Argentina), lo cual indica un mayor mercado ilegal o un mayor control por parte de las autoridades en las aduanas del este.
-
+ Luego de esta exploración pudimos observar como la aparicion del covid-19 no disminuyo la cantidad de incautaciones, sino que hasta aumentaron en gran medida en comparacion con el 2019, tambien que la mayoria son de un muy bajo valor,  una clara mayor cantidad de incautaciones de procedencia brasileña en comparacion con el otro pais fronterizo(Argentina), lo cual indica un mayor mercado ilegal o un mayor control por parte de las autoridades en las aduanas del este. También podría estar relacionado a la oportunidad que ven muchos uruguayos de comprar más barato en las ciudades fronterizas con Brasil,muchas veces comprando bienes ilegalemente y siendo propensos a ser confiscados. Esta hipótesis podría explicar también la gran cantidad de incautaciones de bajo valor y que los artículos más incautados sean vestimenta,comestibles y productos del hogar, así como se corresponde con que el delito más cometido sea el contrabando.
 
