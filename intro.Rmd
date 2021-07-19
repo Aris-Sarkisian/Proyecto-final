@@ -95,7 +95,7 @@ atipicovalor<-quantile(as.numeric(datos$valor),probs=0.75)+1.5*(quantile(as.nume
 datos %>% filter(as.numeric(valor)< atipicovalor) %>%ggplot(aes(x=as.numeric(valor)))+geom_histogram(fill="grey",colour="black",bins=30)+labs(x="Valor en U$",y="Cantidad de incautaciones")
 ```
 
-```{r,echo=FALSE,fig.cap="Se observa una correlacion casi nula entre las variables y una clara tendencia a que las incautaciones sean de bajo valor y cantidad"}
+```{r,echo=FALSE,fig.cap="Se observa una correlacion casi nula entre las variables, pero si una clara tendencia a que las incautaciones sean de bajo valor y en poca cantidad"}
 
 library(plotly)
 library(hexbin)
