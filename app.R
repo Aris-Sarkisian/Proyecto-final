@@ -73,10 +73,10 @@ ui <- fluidPage(
                  plotOutput("caja")),
         
         tabPanel("Tipo de infracción",
-                 selectInput("crimen","Tipo de incautación",c("Abandono","Contrabando","Falsificacion","Receptacion")),
+                 selectInput("crimen","Tipo de infracción",c("Abandono","Contrabando","Falsificacion","Receptacion")),
                  plotOutput("hist2")),
         
-        tabPanel("Valor de incautación",
+        tabPanel("Cantidad de Incautaciones",
                  numericInput("min","Valor mínimo",value=500),
                  numericInput("max","Valor máximo",value=5000),
                  "Los valores oscilan entre 0 y 148000000",
@@ -141,8 +141,10 @@ server <- function(input, output){
         
         atipicocantidad<-quantile(as.numeric(datos$cantidad),probs=0.75)+1.5*(quantile(as.numeric(datos$cantidad),probs=0.75)-quantile(as.numeric(datos$cantidad),probs=0.25))
         
-        datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad,fill=.data[[input$color]]))+geom_hex(size=1/2)+theme(aspect.ratio = 1)
-    })
+        datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad,fill=.data[[input$color]]))+geom_hex(size=1/2)+theme(aspect.ratio = 1)+labs(x="Valor","y=Cantidad")
+   
+        
+         })
     output$prop<-renderTable({
         datos %>% group_by(aduana) %>% summarise(conteo=n()) %>% mutate(proporcion=conteo/sum(conteo))
     })
