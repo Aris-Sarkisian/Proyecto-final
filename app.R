@@ -99,6 +99,7 @@ ui <- fluidPage(
         tabPanel("Relación cantidad y valor",
                  selectInput("color","Variable en color",c("infraccion","estado_incautacion")),
                  plotOutput("puntos"),
+                 "Valor y Cantidad de las incautaciones",
                  plotOutput("puntos2"))
         )
 )
