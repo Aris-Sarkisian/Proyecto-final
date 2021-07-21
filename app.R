@@ -44,8 +44,8 @@ ui <- fluidPage(
                    div(
                        img(
                            src = "imagen.png",
-                           height = 35,
-                           width = 35,
+                           height = 50,
+                           width = 50,
                            style = "margin:10px 10px"
                        ),
                        titulo

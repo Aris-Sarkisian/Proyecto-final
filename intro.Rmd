@@ -1,8 +1,15 @@
 ---
+title: "Incautaciones en Uruguay 2018-2020"
+author: Angel Nuñez y Aris Sarkisian
+date: Julio , 2021
 output:
+  slidy_presentation:
+    font_adjustment: +1/2
   pdf_document: default
   html_document: default
 ---
+
+## Introduccion
 
  Este proyecto nace como un instrumento para poder aplicar los contenidos aprendidos durante el semestre en un problema real. Se tendrá que demostrar los conocimentos adquiridos al realizar un analisis exploratorio sobre datos de interes nacional, poniendo especial énfasis en la correcta visualización de los resultados obtenidos, realizando una correcta interpretación de la misma. 
 En el caso de este grupo en cuestión, se analizarán datos de incautaciones de aduana presentados por la Dirección Nacional de Aduanas, que fueron elegidos  Para llevar a cabo estos objetivos, relacionando tipos y el valor las de inacutaciones, cantidades, procedencia, entre otras variables. Se utilizará exclusivamente el lenguaje de programación R, y sus respectivas expansiones, como Markdown, Shiny y RStudio.
@@ -18,6 +25,8 @@ datos <- read_rds(here('data','raw','datos.rds'))
 dim(datos)
 
 ```
+
+## Datos
 
  Los datos  fueron obtenidos en el catalogo de datos abiertos que puso a disposición el gobierno uruguayo. Más específicamente estos fueron subidos por la Dirección Nacional de Aduanas. Cuentan con 16 variables y 76.792 observaciones. Tres de las varibles son de tipo double, mientras que las restantes son de tipo caracter. Cada observación se refiere a una incautación realizada, y ofrece información soobre ella.Las variables que utilizaremos son:
 
@@ -72,6 +81,7 @@ datos <- as.data.table(datos)
 datos <- datos[, lapply(.SD, iconv, "latin1", "UTF-8")]
 
 ```
+\pagebreak
 
  Para realizar la exploración, nos planteamos algunas preguntas para orientar el análisis. En primer lugar, decidimos investigar de qué manera había evolucionado la cantidad total de incautaciones durante el período en cuestión, teniendo en cuenta las diferentes infracciones que se pueden realizar.
 
@@ -128,17 +138,21 @@ tabla2<- tabla2%>%
   group_by(aduana)%>%
   filter(Freq > 300)
 
+tabla2 %>% xtable(caption="Descripción de las Variables") %>% print(include.rownames = FALSE)
 
 ggplot(tabla2) + geom_tile(aes(x=aduana, y=pais_procedencia, fill=Freq,width = 1, height = 0.8))+ theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+scale_fill_gradient(low="white",high="blue")+labs(y="Pais de procedencia",x="Aduana")
 ```
 
  Como último objetivo, decidimos investigar el estado en el que se encuantra cada incautación, intentando observar cuál infracción demora más tiempo en resolverse.
 
-```{r,echo=FALSE,fig.cap=""}
+```{r,echo=FALSE,fig.cap="Observamos como claramente la infraccion mas comun es contrabando y posteriormente abandono donde ambas se encuentran generalmente en estado contencioso Final(que se encuentra todavia en disputa final)"}
 datos %>% group_by(infraccion,estado_incautacion) %>% summarise(conteo=n())
 tabla<-data.frame(estado=c("Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador"),infraccion=c("Abandono","Abandono","Abandono","Abandono","Abandono","Contrabando","Contrabando","Contrabando","Contrabando","Contrabando","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Receptacion","Receptacion","Receptacion","Receptacion","Receptacion"),Freq=c(17362,399,365,438,2,54169,2090,1004,416,314,101,0,3,0,0,129,0,0,0,0))
 ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradient(low="white",high="grey")+geom_text(aes(label=Freq))
 ```
+\pagebreak
+
+## Shiny App
 
  Al terminar con la exploración, el siguiente paso fue crear una Shiny web App con el objetivo de transmitir de una manera amigable con el usuario las principales exploraciones conseguidas.
 
@@ -153,6 +167,8 @@ ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradie
  Para finalizar, se agregó el gráfico que relaciona valor y cantidad de artículos, pudiendo seleccionar según cuál variable categorica se pretende pintar el interior. Solo se seleccionaron las variables que el gráfico resultante permitiera sacar algún tipo se conclusión. 
 
 
- Luego de esta exploración pudimos observar como la aparicion del covid-19 no disminuyo la cantidad de incautaciones, sino que hasta aumentaron en gran medida en comparacion con el 2019, tambien que la mayoria son de un muy bajo valor,  una clara mayor cantidad de incautaciones de procedencia brasileña en comparacion con el otro pais fronterizo(Argentina), lo cual indica un mayor mercado ilegal o un mayor control por parte de las autoridades en las aduanas del este.
+## Conclusiones Finales
+
+ Luego de esta exploración pudimos observar como la aparicion del covid-19 no disminuyo la cantidad de incautaciones, sino que hasta aumentaron en gran medida en comparacion con el 2019, tambien que la mayoria son de un muy bajo valor,  una clara mayor cantidad de incautaciones de procedencia brasileña en comparacion con el otro pais fronterizo(Argentina), lo cual indica un mayor mercado ilegal o un mayor control por parte de las autoridades en las aduanas del este, y como la mayor cantidad de incautaciones se encuentran en estado de contencioso final sin importar el tipo de infraccion.
 
 
