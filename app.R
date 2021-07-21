@@ -35,9 +35,22 @@ datos <- datos %>%
            valor)
     
     
-    
+titulo <- ""    
 
 ui <- fluidPage(
+
+    titlePanel(windowTitle = titulo,
+               title =
+                   div(
+                       img(
+                           src = "imagen.png",
+                           height = 50,
+                           width = 50,
+                           style = "margin:10px 10px"
+                       ),
+                       titulo
+                   )
+    ),
     navlistPanel(
         id = "tabset",
                  
@@ -86,7 +99,7 @@ ui <- fluidPage(
         tabPanel("Relación cantidad y valor",
                  selectInput("color","Variable en color",c("aduana","infraccion","estado_incautacion")),
                  plotOutput("puntos"))
-        ),img(src = "imagen.png", height = 240, width = 180)
+        )
 )
 
 server <- function(input, output){
@@ -141,7 +154,7 @@ server <- function(input, output){
         
         atipicocantidad<-quantile(as.numeric(datos$cantidad),probs=0.75)+1.5*(quantile(as.numeric(datos$cantidad),probs=0.75)-quantile(as.numeric(datos$cantidad),probs=0.25))
         
-        datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad,fill=.data[[input$color]]))+geom_hex(size=1/2)+theme(aspect.ratio = 1)+labs(x="Valor","y=Cantidad")
+        datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad,fill=(.data[[input$color]])))+geom_hex(size=1/2)+theme(aspect.ratio = 1)+labs(x="Valor","y=Cantidad")
    
         
          })
