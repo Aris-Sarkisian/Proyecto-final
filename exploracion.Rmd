@@ -95,3 +95,8 @@ ggplotly(grafico)
 ```{r,echo=FALSE}
 data.frame(variable=c("fecha_incautacion","aduana","infraccion","pais_procedencia", "estado_incautacion","tipo","cantidad","valor"),descrpición=c("Fecha en que se registró","Aduana en que se realizó","Descrición del crimen realizado","País de donde provenía","Estado en el que se encuentra actualmente","Producto incautado","Cantidad incautada","Valor total en $"))
 ```
+
+```{r}
+datos %>% group_by(tipo) %>% summarise(conteo=n())
+```
+
