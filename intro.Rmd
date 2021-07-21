@@ -15,14 +15,13 @@ output:
 En el caso de este grupo en cuestión, se analizarán datos de incautaciones de aduana presentados por la Dirección Nacional de Aduanas, que fueron elegidos  Para llevar a cabo estos objetivos, relacionando tipos y el valor las de inacutaciones, cantidades, procedencia, entre otras variables. Se utilizará exclusivamente el lenguaje de programación R, y sus respectivas expansiones, como Markdown, Shiny y RStudio.
 
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,message=FALSE}
 library(here)
 library(tidyverse)
 library(readr)
 library(xtable)
 datos <- read_rds(here('data','raw','datos.rds'))
 
-dim(datos)
 
 ```
 
@@ -30,7 +29,7 @@ dim(datos)
 
  Los datos  fueron obtenidos en el catalogo de datos abiertos que puso a disposición el gobierno uruguayo. Más específicamente estos fueron subidos por la Dirección Nacional de Aduanas. Cuentan con 16 variables y 76.792 observaciones. Tres de las varibles son de tipo double, mientras que las restantes son de tipo caracter. Cada observación se refiere a una incautación realizada, y ofrece información soobre ella.Las variables que utilizaremos son:
 
-```{r,echo=FALSE,results="asis",options(xtable.comment = FALSE)}
+```{r,echo=FALSE,results="asis",options(xtable.comment = FALSE),message=FALSE}
 
   
 datos<- datos%>%   
@@ -73,7 +72,7 @@ a %>% xtable(caption="Descripción de las Variables") %>% print(include.rownames
 
 ```
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,message=FALSE}
 
 library(data.table)
 
@@ -85,7 +84,7 @@ datos <- datos[, lapply(.SD, iconv, "latin1", "UTF-8")]
 
  Para realizar la exploración, nos planteamos algunas preguntas para orientar el análisis. En primer lugar, decidimos investigar de qué manera había evolucionado la cantidad total de incautaciones durante el período en cuestión, teniendo en cuenta las diferentes infracciones que se pueden realizar.
 
-```{r,echo=FALSE,fig.cap="Se puede ver un aumento en la cantidad de incautaciones en el correr del año con un gran descenso en el verano diciembre-enero, puede deberse a un menor control aduanero y un enfoque en el turismo, o por un menor comercio en esta época. Se puede ver también como el covid no disminuyó las incautaciones"}
+```{r,echo=FALSE,message=FALSE,fig.cap="Se puede ver un aumento en la cantidad de incautaciones en el correr del año con un gran descenso en el verano diciembre-enero, puede deberse a un menor control aduanero y un enfoque en el turismo, o por un menor comercio en esta época. Se puede ver también como el covid no disminuyó las incautaciones"}
 library(ggpmisc)
 library(ggplot2)
 library(lubridate)
@@ -105,7 +104,7 @@ atipicovalor<-quantile(as.numeric(datos$valor),probs=0.75)+1.5*(quantile(as.nume
 datos %>% filter(as.numeric(valor)< atipicovalor) %>%ggplot(aes(x=as.numeric(valor)))+geom_histogram(fill="grey",colour="black",bins=30)+labs(x="Valor en U$",y="Cantidad de incautaciones")
 ```
 
-```{r,echo=FALSE,fig.cap="Se observa una correlacion casi nula entre las variables, pero si una clara tendencia a que las incautaciones sean de bajo valor y en poca cantidad"}
+```{r,echo=FALSE,message=FALSE,fig.cap="Se observa una correlacion casi nula entre las variables, pero si una clara tendencia a que las incautaciones sean de bajo valor y en poca cantidad"}
 
 library(plotly)
 library(hexbin)
