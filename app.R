@@ -97,8 +97,9 @@ ui <- fluidPage(
                  tableOutput("prop")),
         
         tabPanel("Relación cantidad y valor",
-                 selectInput("color","Variable en color",c("aduana","infraccion","estado_incautacion")),
-                 plotOutput("puntos"))
+                 selectInput("color","Variable en color",c("infraccion","estado_incautacion")),
+                 plotOutput("puntos"),
+                 plotOutput("puntos2"))
         )
 )
 
@@ -155,11 +156,18 @@ server <- function(input, output){
         atipicocantidad<-quantile(as.numeric(datos$cantidad),probs=0.75)+1.5*(quantile(as.numeric(datos$cantidad),probs=0.75)-quantile(as.numeric(datos$cantidad),probs=0.25))
         
         datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad,fill=(.data[[input$color]])))+geom_hex(size=1/2)+theme(aspect.ratio = 1)+labs(x="Valor","y=Cantidad")
-   
-        
          })
+    
     output$prop<-renderTable({
         datos %>% group_by(aduana) %>% summarise(conteo=n()) %>% mutate(proporcion=conteo/sum(conteo))
+    })
+    
+    output$puntos2<-renderPlot({
+        atipicovalor<-quantile(as.numeric(datos$valor),probs=0.75)+1.5*(quantile(as.numeric(datos$valor),probs=0.75)-quantile(as.numeric(datos$valor),probs=0.25))
+        
+        atipicocantidad<-quantile(as.numeric(datos$cantidad),probs=0.75)+1.5*(quantile(as.numeric(datos$cantidad),probs=0.75)-quantile(as.numeric(datos$cantidad),probs=0.25))
+        
+        datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad))+geom_hex(size=1/2)+theme(aspect.ratio = 1)+labs(x="Valor","y=Cantidad")
     })
 }
 
