@@ -1,13 +1,26 @@
 ---
 title: "Incautaciones en Uruguay 2018-2020"
-author: Angel Nuñez y Aris Sarkisian
-date: Julio , 2021
-output:
-  slidy_presentation:
-    font_adjustment: +1/2
+author: "Angel Nuñez y Aris Sarkisian"
+date: "Julio  2021"
+output: 
   pdf_document: default
   html_document: default
+fig_caption: true
+always_allow_html: true
 ---
+
+```{r,echo=FALSE,message=FALSE}
+library(here)
+library(tidyverse)
+library(readr)
+library(xtable)
+library(data.table)
+library(ggpmisc)
+library(ggplot2)
+library(lubridate)
+library(hexbin)
+library(forcats)
+```
 
 ## Introduccion
 
@@ -16,10 +29,7 @@ En el caso de este grupo en cuestión, se analizarán datos de incautaciones de 
 
 
 ```{r,echo=FALSE,message=FALSE}
-library(here)
-library(tidyverse)
-library(readr)
-library(xtable)
+
 datos <- read_rds(here('data','raw','datos.rds'))
 
 
@@ -63,7 +73,7 @@ datos<- datos %>%
 
 
 Variables<-c("fecha_incautacion","aduana","infraccion","pais_procedencia","unidad","estado_incautacion","tipo","cantidad","valor")
-Definicion<-c("Fecha en la cual fue incautada la mercaderia","Ubicacion de la aduana(Local)","Tipo de infraccion cometida","Pais del cual procede la mercaderia incautada","Unidades de medida en la cual esta medida la mercaderia","Estado en el cual se encuentra dicha incautacion ,(Contensioso(Final o inicial),Falsificador, Valorador,Ingresado)","Tipo de mercaderia incautada","Cantidad de unidades incautadas medidas con respecto a la variable 'unidad'","Valor de dicha de la mercaderia incautada medida en U$")
+Definicion<-c("Fecha en la cual fue incautada la mercaderia","Ubicacion de la aduana(Local)","Tipo de infraccion cometida","Pais del cual procede la mercaderia incautada","Unidades de medida en la cual esta medida la mercaderia","Estado en el cual se encuentra dicha incautacion actualmente","Tipo de mercaderia incautada","Cantidad de unidades incautadas medidas con respecto a la variable 'unidad'","Valor de dicha de la mercaderia incautada medida en U$")
 
 a<-data.frame(cbind(Variables,Definicion))
 
@@ -74,7 +84,7 @@ a %>% xtable(caption="Descripción de las Variables") %>% print(include.rownames
 
 ```{r,echo=FALSE,message=FALSE}
 
-library(data.table)
+
 
 datos <- as.data.table(datos)
 datos <- datos[, lapply(.SD, iconv, "latin1", "UTF-8")]
@@ -84,18 +94,19 @@ datos <- datos[, lapply(.SD, iconv, "latin1", "UTF-8")]
 
  Para realizar la exploración, nos planteamos algunas preguntas para orientar el análisis. En primer lugar, decidimos investigar de qué manera había evolucionado la cantidad total de incautaciones durante el período en cuestión, teniendo en cuenta las diferentes infracciones que se pueden realizar.
 
-```{r,echo=FALSE,message=FALSE,fig.cap="Se puede ver un aumento en la cantidad de incautaciones en el correr del año con un gran descenso en el verano diciembre-enero, puede deberse a un menor control aduanero y un enfoque en el turismo, o por un menor comercio en esta época. Se puede ver también como el covid no disminuyó las incautaciones"}
-library(ggpmisc)
-library(ggplot2)
-library(lubridate)
+```{r,echo=FALSE,fig.cap="Se puede ver un aumento en la cantidad de incautaciones en el correr del año con un gran descenso en el verano diciembre-enero, puede deberse a un menor control aduanero y un enfoque en el turismo, o por un menor comercio en esta época. Se puede ver también como el covid no disminuyó las incautaciones"}
+
 datos %>% mutate(fecha=ym(fecha_incautacion)) %>% group_by(fecha) %>% summarise(conteo=n()) %>% ggplot(aes(x=fecha,y=conteo))+geom_line(color='blue')+stat_peaks()+stat_peaks(geom="text",color="black",vjust=-0.3)+labs(x="Fecha de la incautación",y="Cantidad de incautaciones")
 ```
+
+\pagebreak
 
 ```{r,echo=FALSE,fig.cap="Los bajos datos del año 2021 se debe a que los datos llegan solo hasta mitad de año. Existe un claro aumento desde el 2018 a 2019 en todos los tipos de incautaciones, puede ser por un mayor control en las aduanas o un cambio de politica, hay un gran pico de falsificaciones en 2019, mientras que en el 2020 los otros tipos de incautaciones frecuentaron más"}
 datos %>% separate(fecha_incautacion, into=c("anio","mes"),sep=4) %>%group_by(infraccion,anio) %>% summarise(conteo=n()) %>% ggplot(aes(x=anio,y=conteo))+geom_col(fill="lightblue",colour="black")+facet_wrap(~infraccion,scales="free")+labs(x="Año",y="Cantidad")+ scale_fill_manual("Año",values=c("green","yellow","orange","red"))
 ```
 
  Luego decidimos analizar más en profundidad la variable "Valor", que indica el valor de la incautación realizada en cada caso. Para hacer esto, iniciamos observando la distribución de la variable, para luego adentrarnos en la relación que tiene el valor (medido en pesos) con la cantidad de incautaciones incautadas. Es importante destacar que "Valor" presenta datos extremos que dificultan la correcta visualización, por lo que se realizaron calculos básicos para determinar y excluir los valores atípicos y poder observar únicamente los datos de intéres.
+\pagebreak
 
 ```{r,echo=FALSE,fig.cap="Se puede observar que la mayoria de las incautaciones son de un bajo valor"}
 
@@ -104,18 +115,20 @@ atipicovalor<-quantile(as.numeric(datos$valor),probs=0.75)+1.5*(quantile(as.nume
 datos %>% filter(as.numeric(valor)< atipicovalor) %>%ggplot(aes(x=as.numeric(valor)))+geom_histogram(fill="grey",colour="black",bins=30)+labs(x="Valor en U$",y="Cantidad de incautaciones")
 ```
 
-```{r,echo=FALSE,message=FALSE,fig.cap="Se observa una correlacion casi nula entre las variables, pero si una clara tendencia a que las incautaciones sean de bajo valor y en poca cantidad"}
+\pagebreak
 
-library(plotly)
-library(hexbin)
+```{r,echo=FALSE,fig.cap="Se observa una correlacion casi nula entre las variables, pero si una clara tendencia a que las incautaciones sean de bajo valor y en poca cantidad"}
+
+
 
 atipicocantidad<-quantile(as.numeric(datos$cantidad),probs=0.75)+1.5*(quantile(as.numeric(datos$cantidad),probs=0.75)-quantile(as.numeric(datos$cantidad),probs=0.25))
 
 
-grafico<-datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad))+geom_hex()
+datos %>% mutate(cantidad=round(as.numeric(cantidad),0),valor=round(as.numeric(valor),0))%>% filter(valor<atipicovalor)%>% filter(cantidad<atipicocantidad)%>% ggplot(aes(x=valor,y=cantidad))+geom_hex()
 
-ggplotly(grafico)
 ```
+
+Calculando la correlación entre ambas, confirmamos lo que muestra el gráfico.
 
 ```{r,echo=FALSE}
 cor(as.numeric(datos$cantidad),as.numeric(datos$valor))
@@ -123,10 +136,14 @@ cor(as.numeric(datos$cantidad),as.numeric(datos$valor))
 
  A continuación nos enfocamos en la variable "aduana", que hace referencia al lugar dentro del Uruguay que se realizó el acto de incautar. Como primer paso se investigó de que manera se distribuyen las incautaciones totales dentro del territorio nacional. Sucesivamente, nos interesó saber el destino de cada uno de estos actos, sabiendo también el origen.Se utlizaron solo los destinos con más de 300 observaciones debido a la gran cantidad de países con muy pocos datos. 
 
+\pagebreak
+
 ```{r,echo=FALSE,fig.cap="Hay una clara mayor cantidad de incautaciones en las aduanas del este y norte, se debe al mercado con el pais fronterizo Brasil, el cual se diferencia claramente de las aduanas del oeste"}
-library(forcats)
+
 datos %>% group_by(aduana) %>% summarise(conteo=n()) %>% ggplot(aes(x=fct_reorder(aduana,conteo),y=conteo))+geom_col(fill="cyan",colour="black")+theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+labs(y='Cantidad de incautaciones',x='Aduana')
 ```
+
+\pagebreak
 
 ```{r,echo=FALSE,fig.cap="En el grafico se puede observar claramente como la mayor cantidad de incautaciones de dan en las aduanas del este y norte, las de procedencia brasilera. Y como tambien por parte de Argentina pasa lo mismo, pero con aduanas del oeste. En cuanto a las incautaciones provenientes de EEUU todas son incautadas en Carrasco algo que puede tener que ver con el tipo de bien y el nivel adquisitivo"}
 
@@ -138,11 +155,6 @@ tabla2<- tabla2%>%
   group_by(aduana)%>%
   filter(Freq > 300)
 
-<<<<<<< HEAD
-=======
-tabla2 %>% xtable(caption="Descripción de las Variables") %>% print(include.rownames = FALSE)
-
->>>>>>> f0095d4001e4381fc939260fe1315bcc4b3aaf16
 ggplot(tabla2) + geom_tile(aes(x=aduana, y=pais_procedencia, fill=Freq,width = 1, height = 0.8))+ theme(axis.text.x = element_text(angle = 90, vjust=0.5, size = 8))+scale_fill_gradient(low="white",high="blue")+labs(y="Pais de procedencia",x="Aduana")
 ```
 
@@ -153,6 +165,7 @@ datos %>% group_by(infraccion,estado_incautacion) %>% summarise(conteo=n())
 tabla<-data.frame(estado=c("Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador","Contencioso Final","Contencioso Inicial","Falsificacion","Ingresado","Valorador"),infraccion=c("Abandono","Abandono","Abandono","Abandono","Abandono","Contrabando","Contrabando","Contrabando","Contrabando","Contrabando","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Falsificacion","Receptacion","Receptacion","Receptacion","Receptacion","Receptacion"),Freq=c(17362,399,365,438,2,54169,2090,1004,416,314,101,0,3,0,0,129,0,0,0,0))
 ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradient(low="white",high="grey")+geom_text(aes(label=Freq))
 ```
+
 \pagebreak
 
 ## Shiny App
@@ -170,12 +183,9 @@ ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradie
  Para finalizar, se agregó el gráfico que relaciona valor y cantidad de artículos, pudiendo seleccionar según cuál variable categorica se pretende pintar el interior. Solo se seleccionaron las variables que el gráfico resultante permitiera sacar algún tipo se conclusión. 
 
 
-<<<<<<< HEAD
- Luego de esta exploración pudimos observar como la aparicion del covid-19 no disminuyo la cantidad de incautaciones, sino que hasta aumentaron en gran medida en comparacion con el 2019, tambien que la mayoria son de un muy bajo valor,  una clara mayor cantidad de incautaciones de procedencia brasileña en comparacion con el otro pais fronterizo(Argentina), lo cual indica un mayor mercado ilegal o un mayor control por parte de las autoridades en las aduanas del este. También podría estar relacionado a la oportunidad que ven muchos uruguayos de comprar más barato en las ciudades fronterizas con Brasil,muchas veces comprando bienes ilegalemente y siendo propensos a ser confiscados. Esta hipótesis podría explicar también la gran cantidad de incautaciones de bajo valor y que los artículos más incautados sean vestimenta,comestibles y productos del hogar, así como se corresponde con que el delito más cometido sea el contrabando.
-=======
+
+
 ## Conclusiones Finales
 
- Luego de esta exploración pudimos observar como la aparicion del covid-19 no disminuyo la cantidad de incautaciones, sino que hasta aumentaron en gran medida en comparacion con el 2019, tambien que la mayoria son de un muy bajo valor,  una clara mayor cantidad de incautaciones de procedencia brasileña en comparacion con el otro pais fronterizo(Argentina), lo cual indica un mayor mercado ilegal o un mayor control por parte de las autoridades en las aduanas del este, y como la mayor cantidad de incautaciones se encuentran en estado de contencioso final sin importar el tipo de infraccion.
-
->>>>>>> f0095d4001e4381fc939260fe1315bcc4b3aaf16
+ Luego de esta exploración pudimos observar como la aparicion del covid-19 no disminuyo la cantidad de incautaciones, sino que hasta aumentaron en gran medida en comparacion con el 2019, tambien que la mayoria son de un muy bajo valor,  una clara mayor cantidad de incautaciones de procedencia brasileña en comparacion con el otro pais fronterizo(Argentina), lo cual indica un mayor mercado ilegal o un mayor control por parte de las autoridades en las aduanas del este. También podría estar relacionado a la oportunidad que ven muchos uruguayos de comprar más barato en las ciudades fronterizas con Brasil,muchas veces comprando bienes ilegalemente y siendo propensos a ser confiscados. Esta hipótesis podría explicar también la gran cantidad de incautaciones de bajo valor y que los artículos más incautados sean vestimenta,comestibles y productos del hogar, así como se corresponde con que el delito más cometido sea el contrabando.
 
