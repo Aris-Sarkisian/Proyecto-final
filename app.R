@@ -35,9 +35,22 @@ datos <- datos %>%
            valor)
     
     
-    
+titulo <- ""    
 
 ui <- fluidPage(
+
+    titlePanel(windowTitle = titulo,
+               title =
+                   div(
+                       img(
+                           src = "imagen.png",
+                           height = 35,
+                           width = 35,
+                           style = "margin:10px 10px"
+                       ),
+                       titulo
+                   )
+    ),
     navlistPanel(
         id = "tabset",
                  
@@ -86,7 +99,7 @@ ui <- fluidPage(
         tabPanel("Relación cantidad y valor",
                  selectInput("color","Variable en color",c("aduana","infraccion","estado_incautacion")),
                  plotOutput("puntos"))
-        ),img(src = "imagen.png", height = 240, width = 180)
+        )
 )
 
 server <- function(input, output){
