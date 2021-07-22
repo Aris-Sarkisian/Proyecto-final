@@ -172,7 +172,7 @@ ggplot(tabla,aes(x=estado,y=infraccion,fill=Freq))+geom_tile()+scale_fill_gradie
 
  Al terminar con la exploración, el siguiente paso fue crear una Shiny web App con el objetivo de transmitir de una manera amigable con el usuario las principales exploraciones conseguidas.
 
-###link
+### https://aris-sarkisian.shinyapps.io/Proyecto--final/
 
  Dentro de la app, lo primero que se quiso comunicar fue información exclusiva de cada tipo de incautación. La forma de lograr esto fue incorporar un menú desplegable, de donde el usuario puede elegir el tipo de incautación que más le interese. Se muestran dos gráficos con respecto a ellos. El primero es similar a la evolución total de incautaciones realizada anteoriormente , pero especifico para cada tipo de incautación. Y el segundo permite visualizar de qué países provinieron esas incautaciones.
 
