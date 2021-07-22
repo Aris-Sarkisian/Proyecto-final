@@ -4,7 +4,7 @@ library(lubridate)
 library(ggpmisc)
 library(data.table)
 library(readr)
-library(hexbin)
+library(hexbin) 
 library(here)
 
 datos <- read_rds(here('data','raw','datos.rds'))
